@@ -1,0 +1,38 @@
+﻿<Project>
+
+    <PropertyGroup>
+        <OutPath>.sln/cli</OutPath>
+        <OutputPath>$(OutPath)/Debug</OutputPath>
+        <PublishDir>$(OutPath)/build</PublishDir>
+        <RestoreOutputPath>$(OutPath)</RestoreOutputPath>
+        <BaseIntermediateOutputPath>$(OutPath)</BaseIntermediateOutputPath>
+        <MSBuildProjectExtensionsPath>$(OutPath)</MSBuildProjectExtensionsPath>
+    </PropertyGroup>
+
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+    <PropertyGroup>
+        <Version>0.0.1</Version>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+        <PublishAot>true</PublishAot>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFramework>net10.0</TargetFramework>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="marmot.csproj" />
+        <Compile Include="../cli/**/*.cs" Link="cli/%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <Target Name="CopyBuild" AfterTargets="Publish">
+        <ItemGroup>
+            <BuildFile Include=".sln/cli/build/cli" />
+        </ItemGroup>
+        <Copy SourceFiles="@(BuildFile)" DestinationFiles="../../build/marmot" />
+    </Target>
+
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>

@@ -1,0 +1,5 @@
+<Solution>
+    <Project Path="gen.csproj" />
+    <Project Path="marmot.csproj" />
+    <Project Path="cli.csproj" />
+</Solution>

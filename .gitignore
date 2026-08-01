@@ -1,0 +1,14 @@
+# Hidden files
+.*/
+
+# Python
+__pycache__/
+
+# Build files
+/build/
+
+# Project files
+/projects/
+
+# Script maintained
+/lib/raylib/

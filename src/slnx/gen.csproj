@@ -1,0 +1,32 @@
+﻿<Project>
+
+    <PropertyGroup>
+        <OutPath>.sln/gen</OutPath>
+        <OutputPath>$(OutPath)/Debug</OutputPath>
+        <PublishDir>$(OutPath)/build</PublishDir>
+        <RestoreOutputPath>$(OutPath)</RestoreOutputPath>
+        <BaseIntermediateOutputPath>$(OutPath)</BaseIntermediateOutputPath>
+        <MSBuildProjectExtensionsPath>$(OutPath)</MSBuildProjectExtensionsPath>
+    </PropertyGroup>
+
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
+        <Compile Include="../gen/**/*.cs" Link="gen/%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+</Project>
