@@ -69,11 +69,11 @@ public static class ScriptingManager {
                         </ItemGroup>
                         
                         <Target Name="CustomRaylibBuild" AfterTargets="Build">
-                            <Copy SourceFiles="/mnt/secondary/Projects/Marmot/build/lib/libraylib.so"
+                            <Copy SourceFiles="{PathM.LibPath("libraylib.so")}"
                                   DestinationFiles="$(OutDir)runtimes/linux-x64/native/libraylib.so"
                                   SkipUnchangedFiles="false"
                                   Condition="Exists('$(OutDir)runtimes/linux-x64/native/libraylib.so')" />
-                            <Copy SourceFiles="/mnt/secondary/Projects/Marmot/build/lib/libraylib.dll"
+                            <Copy SourceFiles="{PathM.LibPath("libraylib.dll")}"
                                   DestinationFiles="$(OutDir)runtimes/win-x64/native/raylib.dll"
                                   SkipUnchangedFiles="false"
                                   Condition="Exists('$(OutDir)runtimes/win-x64/native/raylib.dll')" />
@@ -82,10 +82,10 @@ public static class ScriptingManager {
                         <Target Name="FixRaylibBundleConflict" BeforeTargets="GenerateSingleFileBundle">
                             <ItemGroup>
                                 <FilesToBundle Remove="@(FilesToBundle)" Condition="'%(FileName)' == 'raylib' or '%(FileName)' == 'libraylib'" />
-                                <FilesToBundle Include="/mnt/secondary/Projects/Marmot/build/lib/libraylib.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+                                <FilesToBundle Include="{PathM.LibPath("libraylib.so")}" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
                                     <RelativePath>libraylib.so</RelativePath>
                                 </FilesToBundle>
-                                <FilesToBundle Include="/mnt/secondary/Projects/Marmot/build/lib/libraylib.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+                                <FilesToBundle Include="{PathM.LibPath("libraylib.dll")}" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
                                     <RelativePath>raylib.dll</RelativePath>
                                 </FilesToBundle>
                             </ItemGroup>
