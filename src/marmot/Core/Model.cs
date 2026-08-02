@@ -12,12 +12,9 @@ public unsafe class Model : Resource {
 
     // Animations
     public ModelAnimation* RlAnims;
-    public float FrameDuration = 1.0f / 30.0f;
     private int _animCount;
 
-    //private int _anim = 6;
-    //private int _frame;
-    //private float _timer;
+    public float FrameDuration = 1.0f / 30.0f;
 
     public override void Import(string path) {
 

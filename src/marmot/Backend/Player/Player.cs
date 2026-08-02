@@ -7,12 +7,12 @@ public static class Player {
 
     private static bool _isRunning;
 
-    public static async Task Ignite(Game game) {
+    public static async Task Ignite(Game game, bool debugMode) {
 
         if (_isRunning) throw new Exception("Player is already running");
         _isRunning = true;
 
-        Compatibility.Check();
+        Compatibility.Check(debugMode);
 
         await ResourceManager.LoadPathMap();
 

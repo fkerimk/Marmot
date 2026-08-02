@@ -129,9 +129,15 @@ def BuildRaylib():
     shutil.rmtree("build", ignore_errors=True)
     os.makedirs("build", exist_ok=True)
     os.chdir("build")
+    
+    # Linux build
+    RunCmd("cmake -S .. -B linux -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=ON")
+    RunCmd(f"cmake --build linux -j{os.cpu_count() or 1}")
 
-    RunCmd("cmake .. -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=ON")
-    RunCmd(f"cmake --build . -j{os.cpu_count() or 1}")
+    # Windows build
+    RunCmd("cmake -S .. -B win -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DBUILD_SHARED_LIBS=ON")
+    RunCmd(f"cmake --build win -j{os.cpu_count() or 1}")
+    
     os.chdir("../../../")
 
 def UpdateRaylib():
@@ -151,8 +157,12 @@ def UpdateRaylib():
             print("Updating Raylib...")
             BuildRaylib()
             
+        # BuildRaylib()
+            
     print("Copying raylib...")
-    shutil.copy2("lib/raylib/build/raylib/libraylib.so.6.0.0", "build/lib/libraylib.so")
+    
+    shutil.copy2("lib/raylib/build/linux/raylib/libraylib.so.6.0.0", "build/lib/libraylib.so")
+    shutil.copy2("lib/raylib/build/win/raylib/libraylib.dll", "build/lib/libraylib.dll")
 
 def BuildEngine():
     

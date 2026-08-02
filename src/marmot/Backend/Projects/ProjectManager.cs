@@ -1,7 +1,7 @@
 using System.Data;
-using System.Diagnostics;
 using System.Text.Json;
 using Marmot.Backend.Resources;
+using Marmot.Backend.Scripting;
 using static System.Text.RegularExpressions.Regex;
 
 namespace Marmot.Backend.Projects;
@@ -58,12 +58,12 @@ public static class ProjectManager {
 
         // Generate project files
         await ResourceManager.Sync(project);
-        await Scripting.GenerateSource(project);
+        await ScriptingManager.GenerateSource(project);
     }
 
     public static async Task Run(Project project) {
 
         await ResourceManager.Sync(project);
-        await Scripting.Build(project, "run", false);
+        await ScriptingManager.Build(project, "run", false);
     }
 }

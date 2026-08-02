@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using Marmot.Backend.Projects;
-using Marmot.Backend.Resources;
+using static System.IO.Path;
 
-namespace Marmot;
+namespace Marmot.Backend.Scripting;
 
-public static class Scripting {
+public static class ScriptingManager {
 
-    public static async Task GenerateSource(Project project) {
+    public static string BuildPlatform { get; private set; } = "win-x64";
+
+    internal static async Task GenerateSource(Project project) {
 
         Directory.CreateDirectory(project.SrcPath);
         Directory.CreateDirectory(project.SrcGenPath);
@@ -36,30 +38,59 @@ public static class Scripting {
                         <PropertyGroup>
                             <Nullable>enable</Nullable>
                             <OutputType>EXE</OutputType>
-                            <PublishAot>true</PublishAot>
                             <AssemblyName>{project.Folder}</AssemblyName>
-                            <StartupObject>Marmot.Backend.Player.{project.Pascal}Entry</StartupObject>
                             <RootNamespace>{project.Pascal}</RootNamespace>
+                            <StartupObject>Marmot.Backend.Player.{project.Pascal}Entry</StartupObject>
                             <ImplicitUsings>enable</ImplicitUsings>
                             <TargetFramework>net10.0</TargetFramework>
                             <InvariantGlobalization>true</InvariantGlobalization>
                             <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
                         </PropertyGroup>
+                        
+                        <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+                            <SelfContained>true</SelfContained>
+                            <PublishTrimmed>false</PublishTrimmed> 
+                            <PublishSingleFile>true</PublishSingleFile>
+                            <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+                            <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+                            <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+                        </PropertyGroup>
 
                         <ItemGroup>
                             <Reference Include="marmot">
-                                <HintPath>{Path.Join(AppContext.BaseDirectory, "lib/marmot.dll")}</HintPath>
+                                <HintPath>{PathM.LibPath("marmot.dll")}</HintPath>
                             </Reference>
                             <Compile Include="{project.SrcPath}/**/*.cs" />
                             <Compile Include="{project.SrcGenPath}/{project.Pascal}Entry.cs" Visible="false" />
                         </ItemGroup>
                         
                         <ItemGroup Condition="'$(includeLibs)' == 'true'">
-                            <Reference Include="Raylib-cs">
-                                <HintPath>/mnt/secondary/Projects/Marmot/build/lib/Raylib-cs.dll</HintPath>
-                            </Reference>
+                            <PackageReference Include="Raylib-cs" Version="8.0.0" />
                         </ItemGroup>
-
+                        
+                        <Target Name="CustomRaylibBuild" AfterTargets="Build">
+                            <Copy SourceFiles="/mnt/secondary/Projects/Marmot/build/lib/libraylib.so"
+                                  DestinationFiles="$(OutDir)runtimes/linux-x64/native/libraylib.so"
+                                  SkipUnchangedFiles="false"
+                                  Condition="Exists('$(OutDir)runtimes/linux-x64/native/libraylib.so')" />
+                            <Copy SourceFiles="/mnt/secondary/Projects/Marmot/build/lib/libraylib.dll"
+                                  DestinationFiles="$(OutDir)runtimes/win-x64/native/raylib.dll"
+                                  SkipUnchangedFiles="false"
+                                  Condition="Exists('$(OutDir)runtimes/win-x64/native/raylib.dll')" />
+                        </Target>
+                            
+                        <Target Name="FixRaylibBundleConflict" BeforeTargets="GenerateSingleFileBundle">
+                            <ItemGroup>
+                                <FilesToBundle Remove="@(FilesToBundle)" Condition="'%(FileName)' == 'raylib' or '%(FileName)' == 'libraylib'" />
+                                <FilesToBundle Include="/mnt/secondary/Projects/Marmot/build/lib/libraylib.so" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+                                    <RelativePath>libraylib.so</RelativePath>
+                                </FilesToBundle>
+                                <FilesToBundle Include="/mnt/secondary/Projects/Marmot/build/lib/libraylib.dll" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+                                    <RelativePath>raylib.dll</RelativePath>
+                                </FilesToBundle>
+                            </ItemGroup>
+                        </Target>
+                        
                         <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
                     </Project>
@@ -75,8 +106,14 @@ public static class Scripting {
                       
                       public static class {{project.Pascal}}Entry {
                       
+                          #if DEBUG
+                          private const bool DebugMode = true;
+                          #else
+                          private const bool DebugMode = false;
+                          #endif
+                      
                           public static async Task Main(string[] args)
-                              => await Player.Ignite(new {{project.Pascal}}.{{project.Pascal}}());
+                              => await Player.Ignite(new {{project.Pascal}}.{{project.Pascal}}(), DebugMode);
                       }
                       """;
 
@@ -85,7 +122,7 @@ public static class Scripting {
 
     private static async Task EnsureTemplate(Project project) {
 
-        var templatePath = Path.Join(project.SrcPath, project.Pascal + ".cs");
+        var templatePath = Join(project.SrcPath, project.Pascal + ".cs");
 
         if (File.Exists(templatePath)) return;
 
@@ -116,12 +153,13 @@ public static class Scripting {
         await File.WriteAllTextAsync(templatePath, template);
     }
 
-    internal static async Task Build(Project project, string cmd = "publish", bool release = true, bool includeLibs = true) {
+    internal static async Task Build(Project project, string cmd = "publish", bool release = true) {
 
         await GenerateSource(project);
 
-        var releaseArgs = release ? "-r linux-x64 -c release" : "";
-        var args = $"{cmd} {releaseArgs} -p:includeLibs={includeLibs}";
+        var platformArgs = $"-r {BuildPlatform}";
+        var releaseArgs = release ? $"{platformArgs} -c release" : "-c debug";
+        var args = $"{cmd} {releaseArgs} -p:includeLibs=true";
 
         var startInfo = new ProcessStartInfo {
 

@@ -2,11 +2,17 @@ namespace Marmot.Backend;
 
 public static class Compatibility {
 
-    public static bool NativeRl;
+    public static bool DebugMode;
+    public static bool IsCpuSkinned { get; private set; }
 
-    internal static void Check() {
+    internal static void Check(bool debugMode) {
 
-        NativeRl = !File.Exists(Path.Join(AppContext.BaseDirectory + "libraylib.so"));
-        if (NativeRl) Log.Warning("Falling back to native raylib");
+        #if DEBUG
+        DebugMode = true;
+        #else
+        DebugMode = debugMode;
+        #endif
+
+        IsCpuSkinned = false;
     }
 }

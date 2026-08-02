@@ -30,7 +30,7 @@
 
     <Target Name="CopyBuild" AfterTargets="Publish">
         <ItemGroup>
-            <BuildFiles Include=".sln/marmot/build/marmot.dll;.sln/marmot/build/Raylib-cs.dll" />
+            <BuildFiles Include=".sln/marmot/build/marmot.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(BuildFiles)" DestinationFolder="../../build/lib" />
     </Target>

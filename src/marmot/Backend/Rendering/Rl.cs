@@ -52,7 +52,7 @@ internal static class Rl {
 
         model.Transform = transform;
 
-        if (Compatibility.NativeRl) {
+        if (Compatibility.IsCpuSkinned) {
 
             var boneMatrices = model.BoneMatricesAsSpan();
 
