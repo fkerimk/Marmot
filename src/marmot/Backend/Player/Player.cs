@@ -10,6 +10,7 @@ public static class Player {
     public static async Task Ignite(Game game, bool debugMode) {
 
         if (_isRunning) throw new Exception("Player is already running");
+
         _isRunning = true;
 
         Compatibility.Check(debugMode);
@@ -17,17 +18,29 @@ public static class Player {
         await ResourceManager.LoadPathMap();
 
         Rl.Init();
+
         game.Init();
 
         while (Rl.IsAlive) {
 
             Rl.BeginDrawing();
+
             game.Loop();
+
+            Scene.Current?.Loop();
+
+            CameraRenderSystem.Start();
+            AnimationSystem.Update();
+            ModelRenderSystem.Draw();
+            CameraRenderSystem.End();
+
             Rl.EndDrawing();
         }
 
         game.Exit();
+
         ResourceManager.UnloadResources();
+
         Rl.Exit();
 
         await Task.CompletedTask;

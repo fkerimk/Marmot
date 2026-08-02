@@ -27,6 +27,13 @@
         <Compile Include="../gen/**/*.cs" Link="gen/%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
+    <Target Name="CopyBuild" AfterTargets="Publish">
+        <ItemGroup>
+            <BuildFiles Include=".sln/gen/build/gen.dll" />
+        </ItemGroup>
+        <Copy SourceFiles="@(BuildFiles)" DestinationFolder="../../build/lib" />
+    </Target>
+
     <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

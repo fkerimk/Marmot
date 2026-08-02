@@ -60,6 +60,7 @@ public static class ScriptingManager {
                             <Reference Include="marmot">
                                 <HintPath>{PathM.LibPath("marmot.dll")}</HintPath>
                             </Reference>
+                            <Analyzer Include="{PathM.LibPath("gen.dll")}" />
                             <Compile Include="{project.SrcPath}/**/*.cs" />
                             <Compile Include="{project.SrcGenPath}/{project.Pascal}Entry.cs" Visible="false" />
                         </ItemGroup>

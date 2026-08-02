@@ -4,12 +4,12 @@ namespace Marmot;
 
 public static unsafe class AnimationSystem {
 
-    public static void Update(World world) {
+    public static void Update() {
 
-        foreach (var (id, animation) in world.AnimationComponents) {
+        foreach (var (id, animation) in Scene.GetComponents<AnimationComponent>()) {
 
-            var model = world.RequireModel(id);
-            var anim = world.GetAnimation(id);
+            var model = id.RequireModel();
+            var anim = id.GetAnimation();
 
             anim.Timer += Time.Delta;
 
@@ -21,7 +21,7 @@ public static unsafe class AnimationSystem {
 
             Rl.SetAnimationFrame(model.Value.GetRlModel(), model.Value.RlAnims[anim.Animation], anim.Frame);
 
-            world.SetAnimation(id, anim);
+            id.SetAnimation(anim);
         }
     }
 }

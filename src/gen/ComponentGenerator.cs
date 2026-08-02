@@ -13,14 +13,6 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
 
     public void Initialize(IncrementalGeneratorInitializationContext context) {
 
-        context.RegisterPostInitializationOutput(ctx
-            => ctx.AddSource("ComponentAttribute.g.cs",
-                SourceText.From("""
-                    namespace Marmot;
-                    [System.AttributeUsage(System.AttributeTargets.Struct)]
-                    public sealed class ComponentAttribute : System.Attribute;
-                """, Encoding.UTF8)));
-
         var components = context.SyntaxProvider.ForAttributeWithMetadataName(
 
             "Marmot.ComponentAttribute",
@@ -55,51 +47,51 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
             #nullable enable
             using System.Collections.Generic;
             namespace Marmot;
-            public partial class World {
         """);
 
-        foreach (var c in components)
-            sb.AppendLine($"public readonly Dictionary<int, {c.FullyQualifiedName}> {c.TypeName}s = [];");
-
         sb.Append("""
-            }
-            public static partial class WorldExtensions {
-            extension (World world) {
+            public static partial class SceneExtensions {
         """);
 
         foreach (var c in components) sb.Append($$"""
             
-            public bool Has{{c.PropertyName}}(int id) => world.{{c.TypeName}}s.ContainsKey(id);
+            extension (int entity) {
             
-            public {{c.FullyQualifiedName}} Get{{c.PropertyName}}(int id) => world.{{c.TypeName}}s[id];
-            public {{c.FullyQualifiedName}} Set{{c.PropertyName}}(int id, {{c.FullyQualifiedName}} value) => world.{{c.TypeName}}s[id] = value;
-            
-            public {{c.FullyQualifiedName}} Get{{c.PropertyName}}OrDefault(int id) {
+                public bool Has{{c.PropertyName}}() => Scene.GetComponents<{{c.FullyQualifiedName}}>().ContainsKey(entity);
         
-                if (world.{{c.TypeName}}s.ContainsKey(id))
-                    return world.{{c.TypeName}}s[id];
-                    
-                return default;
-            }
-            
-            public {{c.FullyQualifiedName}} Ensure{{c.PropertyName}}(int id) {
-            
-                if (!world.{{c.TypeName}}s.ContainsKey(id))
-                    world.{{c.TypeName}}s[id] = default;
-                    
-                return world.{{c.TypeName}}s[id];
-            }
-            
-            public {{c.FullyQualifiedName}} Require{{c.PropertyName}}(int id) {
+                public {{c.FullyQualifiedName}} Get{{c.PropertyName}}() => Scene.GetComponents<{{c.FullyQualifiedName}}>()[entity];
+                public {{c.FullyQualifiedName}} Set{{c.PropertyName}}({{c.FullyQualifiedName}} value) => Scene.GetComponents<{{c.FullyQualifiedName}}>()[entity] = value;
                 
-                if (!world.{{c.TypeName}}s.ContainsKey(id))
-                    throw new KeyNotFoundException("{{c.PropertyName}} component not found for entity" + id);
-                    
-                return world.{{c.TypeName}}s[id];
+                public {{c.FullyQualifiedName}} Get{{c.PropertyName}}OrDefault()
+                {
+                    var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    if (GetComponents.ContainsKey(entity))
+                        return GetComponents[entity];
+                
+                    return default;
+                }
+                
+                public {{c.FullyQualifiedName}} Ensure{{c.PropertyName}}()
+                {
+                    var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    if (!GetComponents.ContainsKey(entity))
+                        GetComponents[entity] = default;
+                
+                    return GetComponents[entity];
+                }
+                
+                public {{c.FullyQualifiedName}} Require{{c.PropertyName}}()
+                {
+                    var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    if (!GetComponents.ContainsKey(entity))
+                        throw new KeyNotFoundException("{{c.PropertyName}} component not found for entity" + entity);
+                
+                    return GetComponents[entity];
+                }
             }
         """);
 
-        sb.Append("}}");
+        sb.Append("}");
 
         context.AddSource("Components.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
     }

@@ -9,11 +9,11 @@ public struct CameraComponent(float fov) {
 
     public float Fov = fov;
 
-    public static Vector3 GetForward(World world, int id) {
+    public static Vector3 GetForward(int id) {
 
-        if (!world.HasRotation(id)) return Vector3.Zero;
+        if (!id.HasRotation()) return Vector3.Zero;
 
-        var rot = world.GetRotation(id);
+        var rot = id.GetRotation();
 
         var pitch = rot.Value.X * DEG2RAD;
         var yaw = rot.Value.Y * DEG2RAD;
@@ -26,12 +26,12 @@ public struct CameraComponent(float fov) {
         ));
     }
 
-    public static void LookAt(World world, int id, Vector3 targetPos) {
+    public static void LookAt(int id, Vector3 targetPos) {
 
-        if (!world.HasPosition(id)) return;
+        if (!id.HasPosition()) return;
 
-        var pos = world.GetPosition(id);
-        var rot = world.EnsureRotation(id);
+        var pos = id.GetPosition();
+        var rot = id.EnsureRotation();
 
         var direction = Vector3.Normalize(targetPos - pos.Value);
 
@@ -39,20 +39,20 @@ public struct CameraComponent(float fov) {
         rot.Value.Y = MathF.Atan2(direction.X, direction.Z) * RAD2DEG;
         rot.Value.Z = 0f;
 
-        world.SetRotation(id, rot);
+        id.SetRotation(rot);
     }
 
-    public static Camera3D GetRlCamera(World world, int id) {
+    public static Camera3D GetRlCamera(int id) {
 
-        var cam = world.GetCameraOrDefault(id);
-        var pos = world.GetPositionOrDefault(id);
+        var cam = id.GetCameraOrDefault();
+        var pos = id.GetPositionOrDefault();
 
         return new() {
 
             Up = Vector3.UnitY,
             Projection = CameraProjection.Perspective,
             Position = pos.Value,
-            Target = pos.Value + GetForward(world, id),
+            Target = pos.Value + GetForward(id),
             FovY = cam.Fov
         };
     }

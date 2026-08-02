@@ -4,17 +4,17 @@ namespace Marmot;
 
 public static class CameraRenderSystem {
 
-    public static void Start(World world) {
+    public static void Start() {
 
-        foreach (var (id, camera) in world.CameraComponents) {
+        foreach (var (id, camera) in Scene.GetComponents<CameraComponent>()) {
 
-            Rl.BeginCamera(CameraComponent.GetRlCamera(world, id));
+            Rl.BeginCamera(CameraComponent.GetRlCamera(id));
         }
     }
 
-    public static void End(World world) {
+    public static void End() {
 
-        foreach (var (id, model) in world.ModelComponents) {
+        foreach (var (id, model) in Scene.GetComponents<CameraComponent>()) {
 
             Rl.EndCamera();
         }

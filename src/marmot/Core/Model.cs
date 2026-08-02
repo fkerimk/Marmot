@@ -24,7 +24,8 @@ public unsafe class Model : Resource {
         var shader = Res.GetShader("shaders/skinning").RlShader
                      ?? throw new FileNotFoundException("Skinning shader not found");
 
-        for (var i = 0; i < _rlModel.Value.MaterialCount; i++) _rlModel.Value.Materials[i].Shader = shader;
+        if (_animCount > 0)
+            for (var i = 0; i < _rlModel.Value.MaterialCount; i++) _rlModel.Value.Materials[i].Shader = shader;
     }
 
     public override void Unload() {

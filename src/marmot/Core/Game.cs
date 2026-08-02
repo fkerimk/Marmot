@@ -2,7 +2,7 @@ namespace Marmot;
 
 public abstract class Game {
 
-    public abstract void Init();
-    public abstract void Loop();
-    public abstract void Exit();
+    public virtual void Init() {}
+    public virtual void Loop() {}
+    public virtual void Exit() {}
 }

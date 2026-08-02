@@ -5,14 +5,14 @@ namespace Marmot;
 
 public static class ModelRenderSystem {
 
-    public static void Draw(World world) {
+    public static void Draw() {
 
-        foreach (var (id, model) in world.ModelComponents) {
+        foreach (var (id, model) in Scene.GetComponents<ModelComponent>()) {
 
-            var pos = world.GetPositionOrDefault(id);
-            var rot = world.GetRotationOrDefault(id);
+            var pos = id.GetPositionOrDefault();
+            var rot = id.GetRotationOrDefault();
 
-            Rl.DrawModel(model.Value.GetRlModel(), pos.Value, rot.Value, Vector3.Create(5));
+            Rl.DrawModel(model.Value.GetRlModel(), pos.Value, rot.Value, Vector3.One * model.Scale);
         }
     }
 }
