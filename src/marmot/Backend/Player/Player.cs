@@ -15,7 +15,7 @@ public static class Player {
 
         Compatibility.Check(debugMode);
 
-        await ResourceManager.LoadPathMap();
+        await ResMan.LoadPathMap();
 
         Rl.Init();
 
@@ -26,8 +26,8 @@ public static class Player {
             Rl.BeginDrawing();
 
             game.Loop();
-
             Scene.Current?.Loop();
+            Time.Update(game);
 
             CameraRenderSystem.Start();
             AnimationSystem.Update();
@@ -39,7 +39,7 @@ public static class Player {
 
         game.Exit();
 
-        ResourceManager.UnloadResources();
+        ResMan.UnloadResources();
 
         Rl.Exit();
 

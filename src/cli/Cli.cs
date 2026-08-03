@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using static Marmot.Backend.Projects.ProjectManager;
-using static Marmot.Backend.Resources.ResourceManager;
 
 namespace Marmot;
 
@@ -53,8 +52,6 @@ internal static class Cli {
 
                     break;
                 }
-
-                case ["project", var name, "sync"]: { await Sync(FindProject(FixedArg(name))); break; }
             }
 
         } catch (Exception e) {

@@ -62,26 +62,26 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
                 public {{c.FullyQualifiedName}} Get{{c.PropertyName}}() => Scene.GetComponents<{{c.FullyQualifiedName}}>()[entity];
                 public {{c.FullyQualifiedName}} Set{{c.PropertyName}}({{c.FullyQualifiedName}} value) => Scene.GetComponents<{{c.FullyQualifiedName}}>()[entity] = value;
                 
-                public {{c.FullyQualifiedName}} Get{{c.PropertyName}}OrDefault()
-                {
+                public {{c.FullyQualifiedName}} Get{{c.PropertyName}}OrDefault() {
+                
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
                     if (GetComponents.ContainsKey(entity))
                         return GetComponents[entity];
                 
-                    return default;
+                    return new {{c.FullyQualifiedName}}();
                 }
                 
-                public {{c.FullyQualifiedName}} Ensure{{c.PropertyName}}()
-                {
+                public {{c.FullyQualifiedName}} Ensure{{c.PropertyName}}() {
+                
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
                     if (!GetComponents.ContainsKey(entity))
-                        GetComponents[entity] = default;
+                        GetComponents[entity] = new {{c.FullyQualifiedName}}();
                 
                     return GetComponents[entity];
                 }
                 
-                public {{c.FullyQualifiedName}} Require{{c.PropertyName}}()
-                {
+                public {{c.FullyQualifiedName}} Require{{c.PropertyName}}() {
+                
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
                     if (!GetComponents.ContainsKey(entity))
                         throw new KeyNotFoundException("{{c.PropertyName}} component not found for entity" + entity);

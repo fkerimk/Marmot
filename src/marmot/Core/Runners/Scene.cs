@@ -1,6 +1,6 @@
 namespace Marmot;
 
-public abstract class Scene {
+public abstract class Scene : Runner {
 
     internal static Scene? Current;
 
@@ -26,8 +26,4 @@ public abstract class Scene {
 
     private int _nextEntityId;
     public int CreateEntity() => _nextEntityId++;
-
-    public virtual void Init() {}
-    public virtual void Loop() {}
-    public virtual void Exit() {}
 }

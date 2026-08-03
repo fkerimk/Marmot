@@ -57,13 +57,13 @@ public static class ProjectManager {
         await File.WriteAllTextAsync(Path.Join(path, "project.json"), json);
 
         // Generate project files
-        await ResourceManager.Sync(project);
+        await ResMan.Sync(project);
         await ScriptingManager.GenerateSource(project);
     }
 
     public static async Task Run(Project project) {
 
-        await ResourceManager.Sync(project);
+        await ResMan.Sync(project);
         await ScriptingManager.Build(project, "run", false);
     }
 }

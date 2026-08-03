@@ -13,8 +13,8 @@ public class Shader : Resource {
 
     public override void Import(string path) {
 
-        var vsPath = ResourceManager.FindResourcePath(path + ".vs", true);
-        var fsPath = ResourceManager.FindResourcePath(path + ".fs", true);
+        var vsPath = ResMan.FindResourcePath(path + ".vs", true);
+        var fsPath = ResMan.FindResourcePath(path + ".fs", true);
 
         if (string.IsNullOrEmpty(vsPath) && string.IsNullOrEmpty(fsPath))
             throw new FileNotFoundException($"No shaders found as {path}");

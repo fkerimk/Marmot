@@ -36,8 +36,5 @@ public unsafe class Model : Resource {
         UnloadModel(_rlModel.Value);
     }
 
-    public Raylib_cs.Model GetRlModel() {
-
-        return _rlModel ?? throw new NullReferenceException("Model is not imported");
-    }
+    public Raylib_cs.Model RlModel => _rlModel ?? throw new NullReferenceException("Model is not imported");
 }

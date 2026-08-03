@@ -19,7 +19,7 @@ public static unsafe class AnimationSystem {
                 anim.Frame = (anim.Frame + 1) % model.Value.RlAnims[anim.Animation].KeyFrameCount;
             }
 
-            Rl.SetAnimationFrame(model.Value.GetRlModel(), model.Value.RlAnims[anim.Animation], anim.Frame);
+            Rl.SetAnimationFrame(model.Value.RlModel, model.Value.RlAnims[anim.Animation], anim.Frame);
 
             id.SetAnimation(anim);
         }

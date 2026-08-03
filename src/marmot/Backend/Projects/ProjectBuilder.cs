@@ -7,7 +7,7 @@ public static class ProjectBuilder {
 
     public static async Task Build(Project project) {
 
-        await ResourceManager.Sync(project);
+        await ResMan.Sync(project);
         await ScriptingManager.Build(project);
 
         // Copy resources
