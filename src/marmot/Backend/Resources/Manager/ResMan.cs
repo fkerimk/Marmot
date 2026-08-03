@@ -13,7 +13,6 @@ internal static partial class ResMan {
     internal static Dictionary<string, string> PathMap = [];
     internal static Dictionary<string, Resource> ResMap = [];
 
-
     internal static async Task LoadPathMap() {
 
         var path = Join(ResPath, "map.json");

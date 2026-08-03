@@ -3,6 +3,7 @@ using Raylib_cs;
 using static Raylib_cs.Raylib;
 using static Raylib_cs.Color;
 using static Raylib_cs.ConfigFlags;
+using static Raylib_cs.Rlgl;
 using static Raylib_cs.TraceLogLevel;
 
 namespace Marmot.Backend.Rendering;
@@ -18,6 +19,8 @@ internal static partial class Rl {
         InitWindow(1280, 720, "Marmot");
         SetWindowMonitor(0);
         SetExitKey(0);
+
+        SetClipPlanes(0.01f, 1000.0f);
     }
 
     internal static void BeginDrawing() {
@@ -36,14 +39,14 @@ internal static partial class Rl {
 
     internal static void EndCamera() => EndMode3D();
 
-
     internal static void DrawBox(Vector3 pos, Vector3 size, Color color) {
 
-        Raylib.DrawCube(pos, size.X, size.Y, size.Z, color);
+        DrawCube(pos, size.X, size.Y, size.Z, color);
     }
 
     internal static void SetAnimationFrame(Raylib_cs.Model model, ModelAnimation anim, int frame)
         => UpdateModelAnimation(model, anim, frame);
+
 
     internal static void Exit() => CloseWindow();
 }

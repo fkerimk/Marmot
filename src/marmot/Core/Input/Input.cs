@@ -6,22 +6,14 @@ namespace Marmot;
 
 public static unsafe class Input {
 
-    public static bool Cursor {
-
-        get; set {
-
-            field = value;
-
-            if (value)
-                 EnableCursor();
-            else DisableCursor();
-        }
-    }
+    public static bool CursorLock;
+    public static Vector2 MouseDelta;
 
     public static Vector2 MousePos    => GetMousePosition();
-    public static Vector2 MouseDelta  => GetMouseDelta();
     public static float   MouseScroll => GetMouseWheelMove();
 
+    private static bool _isCursorLocked;
+    private static Vector2 _cursorLockPosition;
     public static bool IsButtonDown     (Button button, int gamepad = 0) => ResolveButton(button, &IsMouseButtonDown    , &IsKeyDown    , &IsGamepadButtonDown    , gamepad);
     public static bool IsButtonPressed  (Button button, int gamepad = 0) => ResolveButton(button, &IsMouseButtonPressed , &IsKeyPressed , &IsGamepadButtonPressed , gamepad);
     public static bool IsButtonReleased (Button button, int gamepad = 0) => ResolveButton(button, &IsMouseButtonReleased, &IsKeyReleased, &IsGamepadButtonReleased, gamepad);
@@ -43,5 +35,30 @@ public static unsafe class Input {
             _ => false
         };
     }
+    internal static void Update() {
 
+        MouseDelta = GetMouseDelta();
+
+        UpdateCursorLock();
+    }
+
+    private static void UpdateCursorLock() {
+
+        switch (CursorLock) {
+
+            case true when !_isCursorLocked:
+
+                _isCursorLocked = true;
+                _cursorLockPosition = GetMousePosition();
+                DisableCursor();
+                break;
+
+            case false when _isCursorLocked:
+                _isCursorLocked = false;
+                EnableCursor();
+                break;
+        }
+
+        if (CursorLock) SetMousePosition((int)Math.Floor(_cursorLockPosition.X), (int)Math.Floor(_cursorLockPosition.Y));
+    }
 }

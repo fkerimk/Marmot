@@ -13,4 +13,9 @@ public static class Log {
 
         PrintColor($"Warning: {message}", ConsoleColor.Yellow);
     }
+
+    public static void Error(string message) {
+
+        PrintColor($"Error: {message}", ConsoleColor.Red);
+    }
 }

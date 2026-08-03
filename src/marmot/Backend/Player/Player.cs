@@ -23,18 +23,24 @@ public static class Player {
 
         while (Rl.IsAlive) {
 
+            Input.Update();
+
             Rl.BeginDrawing();
 
+            // Logic
             game.Loop();
             Scene.Current?.Loop();
             Time.Update(game);
+            FreeCamSystem.Update();
 
+            // Render
             CameraRenderSystem.Start();
             AnimationSystem.Update();
             ModelRenderSystem.Draw();
             CameraRenderSystem.End();
 
             Rl.EndDrawing();
+
         }
 
         game.Exit();
