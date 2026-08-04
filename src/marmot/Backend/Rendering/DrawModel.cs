@@ -1,10 +1,10 @@
 using System.Numerics;
 using Raylib_cs;
-using static Raylib_cs.Color;
+using static Raylib_cs.Rlgl;
 
 namespace Marmot.Backend.Rendering;
 
-internal static partial class Rl {
+internal static unsafe partial class Rl {
 
     internal static void DrawModel(Raylib_cs.Model model) {
 
@@ -19,6 +19,23 @@ internal static partial class Rl {
             }
         }
 
-        Raylib.DrawModel(model, Vector3.Zero, 1.0f, White);
+        var meshes = model.MeshesAsSpan();
+
+        for (var i = 0; i < model.MeshCount; i++) {
+
+            var materialIndex = model.MeshMaterial[i];
+            var material = materialIndex >= 0 && materialIndex < model.MaterialCount
+                ? model.Materials[materialIndex]
+                : model.Materials[0];
+
+            var boneTransformLoc = material.Shader.Locs[(int)ShaderLocationIndex.MatrixBoneTransforms];
+            if (boneTransformLoc != -1 && model.BoneMatrices != null) {
+
+                EnableShader(material.Shader.Id);
+                SetUniformMatrices(boneTransformLoc, model.BoneMatrices, model.Skeleton.BoneCount);
+            }
+
+            Raylib.DrawMesh(meshes[i], material, model.Transform);
+        }
     }
 }

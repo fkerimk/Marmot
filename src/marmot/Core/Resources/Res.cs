@@ -5,9 +5,6 @@ namespace Marmot;
 
 public static class Res {
 
-    public static ShaderRes MainShader;
-    public static ShaderRes SkinnedMainShader;
-
     private static T Get<T>(string relativePath) where T : Resource, new()
         => (T)ResMan.GetResource<T>(relativePath);
 

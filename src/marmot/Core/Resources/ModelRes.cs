@@ -1,3 +1,4 @@
+using Marmot.Backend.Rendering;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
@@ -24,13 +25,19 @@ public unsafe class ModelRes : Resource {
         for (var m = 0; m < RlModel.MeshCount; m++)
             GenMeshTangents(ref RlModel.Meshes[m]);
 
+        MaterialUtils.EnsureModelMaterialDefaults(ref RlModel);
+
         for (var i = 0; i < RlModel.MaterialCount; i++) {
 
             SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Albedo].Texture, TextureFilter.Bilinear);
-            RlModel.Materials[i].Shader = _animCount > 0 ? Res.SkinnedMainShader.RlShader!.Value : Res.MainShader.RlShader!.Value;
-        }
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Metalness].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Normal].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Roughness].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Occlusion].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Emission].Texture, TextureFilter.Bilinear);
 
-        MaterialUtils.EnsureModelMaterialDefaults(ref RlModel);
+            RlModel.Materials[i].Shader = _animCount > 0 ? Pbr.SkinnedMainShader : Pbr.MainShader;
+        }
 
         Bounds = GetModelBoundingBox(RlModel);
     }
@@ -38,6 +45,7 @@ public unsafe class ModelRes : Resource {
     public override void Unload() {
 
         UnloadModelAnimations(RlAnims, _animCount);
+        MaterialUtils.DetachModelMaterialDefaults(ref RlModel);
         UnloadModel(RlModel);
     }
 }

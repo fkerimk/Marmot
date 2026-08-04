@@ -14,7 +14,6 @@ internal class BlenderImporter : Importer {
         var startInfo = new ProcessStartInfo {
 
             FileName = "blender",
-            //Arguments = $"-b \"{sourcePath}\" --python \"{Path.Join(AppContext.BaseDirectory, "lib/io_scene_m3d.py")}\" --python-expr \"import bpy; bpy.ops.export_scene.m3d(filepath='{targetPath}', use_inline=True)\"",
             Arguments = $"-b \"{sourcePath}\" --python \"{Path.Join(AppContext.BaseDirectory, "lib/io_scene_m3d.py")}\" --python-expr \"import bpy; bpy.ops.export_scene.m3d(filepath='{targetPath}', use_inline=True, use_gridcompress=False)\"",
             WorkingDirectory = dir,
             UseShellExecute = false,

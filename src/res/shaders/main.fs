@@ -36,13 +36,22 @@ uniform int useTexRoughness;
 uniform int useTexOcclusion;
 uniform int useTexEmissive;
 
-// Constant values to use if there is no texture
+// Instance-level material modifiers
 uniform vec4 colDiffuse;
-uniform float metallicValue;
-uniform float roughnessValue;
-uniform float aoValue;
-uniform vec3 emissiveColor;
+uniform vec3 albedoBlend;
+uniform vec3 emissiveBlend;
+uniform float albedoMultiplier;
+uniform float metalnessMultiplier;
+uniform float normalMultiplier;
+uniform float roughnessMultiplier;
+uniform float occlusionMultiplier;
 uniform float emissiveIntensity;
+uniform float albedoOverride;
+uniform float metalnessOverride;
+uniform float normalOverride;
+uniform float roughnessOverride;
+uniform float occlusionOverride;
+uniform float emissiveOverride;
 
 // Light data
 struct Light {
@@ -69,30 +78,33 @@ const float PI = 3.14159265359;
 
 vec3 GetAlbedo() {
 
-    vec3 tex = useTexAlbedo == 1 ? texture(texture0, fragTexCoord).rgb : vec3(1.0);
-    return tex * colDiffuse.rgb * fragColor.rgb;
+    vec3 tex = albedoOverride >= 0.0 ? vec3(albedoOverride) : (useTexAlbedo == 1 ? texture(texture0, fragTexCoord).rgb * albedoMultiplier : vec3(1.0));
+    return tex * albedoBlend * colDiffuse.rgb * fragColor.rgb;
 }
 
 float GetMetallic() {
 
-    return useTexMetalness == 1 ? texture(texture1, fragTexCoord).r : metallicValue;
+    float value = useTexMetalness == 1 ? texture(texture1, fragTexCoord).r * metalnessMultiplier : 0.0;
+    return clamp(metalnessOverride >= 0.0 ? metalnessOverride : value, 0.0, 1.0);
 }
 
 float GetRoughness() {
 
-    float r = useTexRoughness == 1 ? texture(texture3, fragTexCoord).r : roughnessValue;
+    float r = useTexRoughness == 1 ? texture(texture3, fragTexCoord).r * roughnessMultiplier : 1.0;
+    r = roughnessOverride >= 0.0 ? roughnessOverride : r;
     return clamp(r, 0.04, 1.0);
 }
 
 float GetAO() {
 
-    return useTexOcclusion == 1 ? texture(texture4, fragTexCoord).r : aoValue;
+    float value = useTexOcclusion == 1 ? texture(texture4, fragTexCoord).r * occlusionMultiplier : 1.0;
+    return clamp(occlusionOverride >= 0.0 ? occlusionOverride : value, 0.0, 1.0);
 }
 
 vec3 GetEmissive() {
 
-    vec3 tex = useTexEmissive == 1 ? texture(texture5, fragTexCoord).rgb : vec3(1.0);
-    return tex * emissiveColor * emissiveIntensity;
+    vec3 tex = emissiveOverride >= 0.0 ? vec3(emissiveOverride) : (useTexEmissive == 1 ? texture(texture5, fragTexCoord).rgb : vec3(0.0));
+    return tex * emissiveBlend * emissiveIntensity;
 }
 
 vec3 GetNormal() {
@@ -115,6 +127,8 @@ vec3 GetNormal() {
         
         // Read from normal map and scale to [-1, 1] range
         vec3 tangentNormal = texture(texture2, fragTexCoord).xyz * 2.0 - 1.0;
+        tangentNormal.xy *= normalOverride >= 0.0 ? normalOverride : normalMultiplier;
+        tangentNormal = normalize(tangentNormal);
         
         // Transform to world space
         return normalize(TBN * tangentNormal);

@@ -9,6 +9,9 @@ internal static class Pbr {
 
     private const int MaxLights = 4;
 
+    internal static Shader MainShader;
+    internal static Shader SkinnedMainShader;
+
     private static Shader[] _shaders = [];
 
     // A uniform with the same name may have a different location index in two different shaders
@@ -29,11 +32,20 @@ internal static class Pbr {
     private static int[,] _outerLoc     = new int[0, 0];
 
     // Material uniform locations cached to avoid calling GetShaderLocation for every frame
-    private static int[] _metallicLoc = [];
-    private static int[] _roughnessLoc = [];
-    private static int[] _aoLoc = [];
-    private static int[] _emissiveColorLoc = [];
+    private static int[] _albedoBlendLoc = [];
+    private static int[] _emissiveBlendLoc = [];
+    private static int[] _albedoMultiplierLoc = [];
+    private static int[] _metalnessMultiplierLoc = [];
+    private static int[] _normalMultiplierLoc = [];
+    private static int[] _roughnessMultiplierLoc = [];
+    private static int[] _occlusionMultiplierLoc = [];
     private static int[] _emissiveIntensityLoc = [];
+    private static int[] _albedoOverrideLoc = [];
+    private static int[] _metalnessOverrideLoc = [];
+    private static int[] _normalOverrideLoc = [];
+    private static int[] _roughnessOverrideLoc = [];
+    private static int[] _occlusionOverrideLoc = [];
+    private static int[] _emissiveOverrideLoc = [];
     private static int[] _useTexAlbedoLoc = [];
     private static int[] _useTexMetalnessLoc = [];
     private static int[] _useTexNormalLoc = [];
@@ -41,7 +53,14 @@ internal static class Pbr {
     private static int[] _useTexOcclusionLoc = [];
     private static int[] _useTexEmissiveLoc = [];
 
-    internal static void LoadMainShaders() {
+    private const bool UseTexAlbedo    = true;
+    private const bool UseTexMetalness = true;
+    private const bool UseTexNormal    = true;
+    private const bool UseTexRoughness = true;
+    private const bool UseTexOcclusion = true;
+    private const bool UseTexEmissive  = true;
+
+    internal static void Load() {
 
         var shader = new ShaderRes();
         var skinShader = new ShaderRes();
@@ -55,10 +74,13 @@ internal static class Pbr {
 
         ResMan.ResMap["shaders/main"] = shader;
 
-        Res.MainShader = shader;
-        Res.SkinnedMainShader = skinShader;
+        MainShader = shader.RlShader.Value;
+        SkinnedMainShader = skinShader.RlShader.Value;
 
-        _shaders = [Res.MainShader.RlShader!.Value, Res.SkinnedMainShader.RlShader!.Value];
+        //SetupMaterialMapLocations(ref MainShader);
+        //SetupMaterialMapLocations(ref SkinnedMainShader);
+
+        _shaders = [ MainShader, SkinnedMainShader ];
 
         var count = _shaders.Length;
 
@@ -103,11 +125,20 @@ internal static class Pbr {
         }
 
         // Cache the uniform locations of the materials
-        _metallicLoc          = new int[count];
-        _roughnessLoc         = new int[count];
-        _aoLoc                = new int[count];
-        _emissiveColorLoc     = new int[count];
+        _albedoBlendLoc       = new int[count];
+        _emissiveBlendLoc     = new int[count];
+        _albedoMultiplierLoc  = new int[count];
+        _metalnessMultiplierLoc = new int[count];
+        _normalMultiplierLoc = new int[count];
+        _roughnessMultiplierLoc = new int[count];
+        _occlusionMultiplierLoc = new int[count];
         _emissiveIntensityLoc = new int[count];
+        _albedoOverrideLoc = new int[count];
+        _metalnessOverrideLoc = new int[count];
+        _normalOverrideLoc = new int[count];
+        _roughnessOverrideLoc = new int[count];
+        _occlusionOverrideLoc = new int[count];
+        _emissiveOverrideLoc = new int[count];
         _useTexAlbedoLoc      = new int[count];
         _useTexMetalnessLoc   = new int[count];
         _useTexNormalLoc      = new int[count];
@@ -119,11 +150,20 @@ internal static class Pbr {
 
             var rl = _shaders[s];
 
-            _metallicLoc[s]          = GetShaderLocation(rl, "metallicValue");
-            _roughnessLoc[s]         = GetShaderLocation(rl, "roughnessValue");
-            _aoLoc[s]                = GetShaderLocation(rl, "aoValue");
-            _emissiveColorLoc[s]     = GetShaderLocation(rl, "emissiveColor");
+            _albedoBlendLoc[s]       = GetShaderLocation(rl, "albedoBlend");
+            _emissiveBlendLoc[s]     = GetShaderLocation(rl, "emissiveBlend");
+            _albedoMultiplierLoc[s]  = GetShaderLocation(rl, "albedoMultiplier");
+            _metalnessMultiplierLoc[s] = GetShaderLocation(rl, "metalnessMultiplier");
+            _normalMultiplierLoc[s] = GetShaderLocation(rl, "normalMultiplier");
+            _roughnessMultiplierLoc[s] = GetShaderLocation(rl, "roughnessMultiplier");
+            _occlusionMultiplierLoc[s] = GetShaderLocation(rl, "occlusionMultiplier");
             _emissiveIntensityLoc[s] = GetShaderLocation(rl, "emissiveIntensity");
+            _albedoOverrideLoc[s] = GetShaderLocation(rl, "albedoOverride");
+            _metalnessOverrideLoc[s] = GetShaderLocation(rl, "metalnessOverride");
+            _normalOverrideLoc[s] = GetShaderLocation(rl, "normalOverride");
+            _roughnessOverrideLoc[s] = GetShaderLocation(rl, "roughnessOverride");
+            _occlusionOverrideLoc[s] = GetShaderLocation(rl, "occlusionOverride");
+            _emissiveOverrideLoc[s] = GetShaderLocation(rl, "emissiveOverride");
             _useTexAlbedoLoc[s]      = GetShaderLocation(rl, "useTexAlbedo");
             _useTexMetalnessLoc[s]   = GetShaderLocation(rl, "useTexMetalness");
             _useTexNormalLoc[s]      = GetShaderLocation(rl, "useTexNormal");
@@ -135,6 +175,16 @@ internal static class Pbr {
         Console.WriteLine($"lightsCountLoc[0]={_lightsCountLoc[0]} lightsCountLoc[1]={_lightsCountLoc[1]}");
         Console.WriteLine($"posLoc[0,0]={_posLoc[0,0]} posLoc[1,0]={_posLoc[1,0]}");
         Console.WriteLine($"matNormalLoc[0]={_matNormalLoc[0]} matNormalLoc[1]={_matNormalLoc[1]}");
+    }
+
+    private static unsafe void SetupMaterialMapLocations(ref Shader shader) {
+
+        shader.Locs[(int)ShaderLocationIndex.MapAlbedo] = GetShaderLocation(shader, "texture0");
+        shader.Locs[(int)ShaderLocationIndex.MapMetalness] = GetShaderLocation(shader, "texture1");
+        shader.Locs[(int)ShaderLocationIndex.MapNormal] = GetShaderLocation(shader, "texture2");
+        shader.Locs[(int)ShaderLocationIndex.MapRoughness] = GetShaderLocation(shader, "texture3");
+        shader.Locs[(int)ShaderLocationIndex.MapOcclusion] = GetShaderLocation(shader, "texture4");
+        shader.Locs[(int)ShaderLocationIndex.MapEmission] = GetShaderLocation(shader, "texture5");
     }
 
     private static void SetAmbient(Vector3 color, float intensity) {
@@ -202,44 +252,32 @@ internal static class Pbr {
             SetShaderValue(_shaders[s], _lightsCountLoc[s], index, ShaderUniformDataType.Int);
     }
 
-    private static void ApplyUniforms(
-        float metallic,
-        float roughness,
-        float ao,
-        Vector3 emissiveColor,
-        float emissiveIntensity,
-        bool hasAlbedoTex,
-        bool hasMetalnessTex,
-        bool hasNormalTex,
-        bool hasRoughnessTex,
-        bool hasOcclusionTex,
-        bool hasEmissiveTex)
-    {
+    internal static void ApplyUniforms(Model model) {
+
         for (var s = 0; s < _shaders.Length; s++) {
 
-            SetShaderValue(_shaders[s], _metallicLoc[s],          metallic,          ShaderUniformDataType.Float);
-            SetShaderValue(_shaders[s], _roughnessLoc[s],         roughness,         ShaderUniformDataType.Float);
-            SetShaderValue(_shaders[s], _aoLoc[s],                ao,                ShaderUniformDataType.Float);
-            SetShaderValue(_shaders[s], _emissiveColorLoc[s],     emissiveColor,     ShaderUniformDataType.Vec3);
-            SetShaderValue(_shaders[s], _emissiveIntensityLoc[s], emissiveIntensity, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _albedoBlendLoc[s],       model.AlbedoBlend,       ShaderUniformDataType.Vec3);
+            SetShaderValue(_shaders[s], _emissiveBlendLoc[s],     model.EmissiveBlend,     ShaderUniformDataType.Vec3);
+            SetShaderValue(_shaders[s], _albedoMultiplierLoc[s],  model.AlbedoMultiplier,  ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _metalnessMultiplierLoc[s], model.MetalnessMultiplier, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _normalMultiplierLoc[s], model.NormalMultiplier, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _roughnessMultiplierLoc[s], model.RoughnessMultiplier, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _occlusionMultiplierLoc[s], model.OcclusionMultiplier, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _emissiveIntensityLoc[s], model.EmissiveIntensity, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _albedoOverrideLoc[s], model.AlbedoOverride, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _metalnessOverrideLoc[s], model.MetalnessOverride, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _normalOverrideLoc[s], model.NormalOverride, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _roughnessOverrideLoc[s], model.RoughnessOverride, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _occlusionOverrideLoc[s], model.OcclusionOverride, ShaderUniformDataType.Float);
+            SetShaderValue(_shaders[s], _emissiveOverrideLoc[s], model.EmissiveOverride, ShaderUniformDataType.Float);
 
-            SetShaderValue(_shaders[s], _useTexAlbedoLoc[s],    hasAlbedoTex    ? 1 : 0, ShaderUniformDataType.Int);
-            SetShaderValue(_shaders[s], _useTexMetalnessLoc[s], hasMetalnessTex ? 1 : 0, ShaderUniformDataType.Int);
-            SetShaderValue(_shaders[s], _useTexNormalLoc[s],    hasNormalTex    ? 1 : 0, ShaderUniformDataType.Int);
-            SetShaderValue(_shaders[s], _useTexRoughnessLoc[s], hasRoughnessTex ? 1 : 0, ShaderUniformDataType.Int);
-            SetShaderValue(_shaders[s], _useTexOcclusionLoc[s], hasOcclusionTex ? 1 : 0, ShaderUniformDataType.Int);
-            SetShaderValue(_shaders[s], _useTexEmissiveLoc[s],  hasEmissiveTex  ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexAlbedoLoc[s],    UseTexAlbedo    ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexMetalnessLoc[s], UseTexMetalness ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexNormalLoc[s],    UseTexNormal    ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexRoughnessLoc[s], UseTexRoughness ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexOcclusionLoc[s], UseTexOcclusion ? 1 : 0, ShaderUniformDataType.Int);
+            SetShaderValue(_shaders[s], _useTexEmissiveLoc[s],  UseTexEmissive  ? 1 : 0, ShaderUniformDataType.Int);
         }
-    }
-
-    internal static void ApplyUniforms() {
-
-        ApplyUniforms(
-            metallic: 0.0f, roughness: 0.6f, ao: 1.0f,
-            emissiveColor: Vector3.Zero, emissiveIntensity: 0f,
-            hasAlbedoTex: true, hasMetalnessTex: true, hasNormalTex: true,
-            hasRoughnessTex: true, hasOcclusionTex: true, hasEmissiveTex: true
-        );
     }
 
     internal static void Update() {
@@ -250,5 +288,11 @@ internal static class Pbr {
         SetViewPosition(camTransform.RlPosition);
         SetAmbient(new Vector3(0.03f, 0.03f, 0.03f), 1.0f);
         UpdateLights();
+    }
+
+    internal static void Unload() {
+
+        foreach (var shader in _shaders)
+            UnloadShader(shader);
     }
 }

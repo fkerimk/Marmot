@@ -19,7 +19,7 @@ public static class Player {
 
         Rl.Init();
 
-        Pbr.LoadMainShaders();
+        Pbr.Load();
         MaterialUtils.InitDefaultTextures();
 
         game.Init();
@@ -51,7 +51,9 @@ public static class Player {
         game.Exit();
 
         ResMan.UnloadResources();
+
         MaterialUtils.UnloadDefaultTextures();
+        Pbr.Unload();
 
         Rl.Exit();
 

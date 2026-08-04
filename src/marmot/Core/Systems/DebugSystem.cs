@@ -27,7 +27,7 @@ public static class DebugSystem {
 
             var transform = id.GetTransformOrDefault();
 
-            Rl.DrawSphere(transform.RlPosition, 0.1f, light.Color.ToRlColor());
+            Rl.DrawSphere(transform.RlPosition, 0.025f, light.Color.ToRlColor());
         }
     }
 }
