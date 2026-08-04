@@ -170,7 +170,8 @@ public static class ScriptingManager {
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            Environment = { ["DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION"] = "1" }
         };
 
         using var process = Process.Start(startInfo);

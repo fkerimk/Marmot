@@ -39,14 +39,16 @@ internal static partial class Rl {
 
     internal static void EndCamera() => EndMode3D();
 
-    internal static void DrawBox(Vector3 pos, Vector3 size, Color color) {
+    internal static void DrawBounds(BoundingBox box, Color color) {
 
-        DrawCube(pos, size.X, size.Y, size.Z, color);
+        DrawBoundingBox(box, color);
     }
 
-    internal static void SetAnimationFrame(Raylib_cs.Model model, ModelAnimation anim, int frame)
-        => UpdateModelAnimation(model, anim, frame);
+    internal static void DrawSphere(Vector3 position, float radius, Color color) =>
+        Raylib.DrawSphere(position, radius, color);
 
+    internal static void SetAnimationFrame(Raylib_cs.Model model, ModelAnimation anim, int frame) =>
+        UpdateModelAnimation(model, anim, frame);
 
     internal static void Exit() => CloseWindow();
 }

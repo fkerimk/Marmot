@@ -1,17 +1,33 @@
-using System.Numerics;
-using Marmot.Backend.Rendering;
 using Raylib_cs;
+
+using Marmot.Backend.Rendering;
 
 namespace Marmot;
 
 public static class DebugSystem {
 
+    private const float Alpha = 0.25f;
+    private static readonly Color White = new(1, 1, 1, Alpha);
+
     public static void Debug3D() {
 
-        foreach (var (id, model) in Scene.GetComponents<ModelComponent>()) {
+        DrawModels();
+        DrawLights();
+    }
+
+    private static void DrawModels() {
+
+        foreach (var (id, model) in Scene.GetComponents<Model>())
+            Rl.DrawBounds(model.Resource.Bounds.Transform(id.GetTransformOrDefault()), White);
+    }
+
+    private static void DrawLights() {
+
+        foreach (var (id, light) in Scene.GetComponents<Light>()) {
 
             var transform = id.GetTransformOrDefault();
-            Rl.DrawBox(transform.Position, Vector3.One, Color.White);
+
+            Rl.DrawSphere(transform.RlPosition, 0.1f, light.Color.ToRlColor());
         }
     }
 }

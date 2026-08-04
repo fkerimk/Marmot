@@ -6,22 +6,22 @@ public static unsafe class AnimationSystem {
 
     public static void Update() {
 
-        foreach (var (id, animation) in Scene.GetComponents<AnimationComponent>()) {
+        foreach (var (id, animation) in Scene.GetComponents<Animator>()) {
 
             var model = id.RequireModel();
-            var anim = id.GetAnimation();
+            var anim = id.GetAnimator();
 
             anim.Timer += Time.Delta;
 
-            while (anim.Timer >= model.Value.FrameDuration) {
+            while (anim.Timer >= model.FrameDuration) {
 
-                anim.Timer -= model.Value.FrameDuration;
-                anim.Frame = (anim.Frame + 1) % model.Value.RlAnims[anim.Animation].KeyFrameCount;
+                anim.Timer -= model.FrameDuration;
+                anim.Frame = (anim.Frame + 1) % model.Resource.RlAnims[anim.Animation].KeyFrameCount;
             }
 
-            Rl.SetAnimationFrame(model.Value.RlModel, model.Value.RlAnims[anim.Animation], anim.Frame);
+            Rl.SetAnimationFrame(model.Resource.RlModel, model.Resource.RlAnims[anim.Animation], anim.Frame);
 
-            id.SetAnimation(anim);
+            id.SetAnimator(anim);
         }
     }
 }

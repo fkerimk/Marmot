@@ -9,13 +9,35 @@ public static class Log {
         if (color.HasValue) Console.ResetColor();
     }
 
-    public static void Warning(string message) {
+    public static void Info(string message) {
 
-        PrintColor($"Warning: {message}", ConsoleColor.Yellow);
+        PrintColor($"Info: {message}", ConsoleColor.Blue);
     }
 
-    public static void Error(string message) {
+    public static void Warn(string message) {
 
-        PrintColor($"Error: {message}", ConsoleColor.Red);
+        PrintColor($"Warn: {message}", ConsoleColor.Yellow);
+    }
+
+    public static void Pass(string message) {
+
+        PrintColor($"Pass: {message}", ConsoleColor.Green);
+    }
+
+
+    public static void Fail(string message) {
+
+        PrintColor($"Fail: {message}", ConsoleColor.Red);
+    }
+
+    public static Exception FailException (string message) {
+
+        Fail(message);
+        return new Exception();
+    }
+
+    public static Exception ComponentException<T>(int id) {
+
+        throw FailException($"{typeof(T).Name} with id {id} does not exist");
     }
 }

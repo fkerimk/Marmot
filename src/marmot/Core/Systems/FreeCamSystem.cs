@@ -6,7 +6,7 @@ public static class FreeCamSystem {
 
     public static void Update() {
 
-        foreach (var (id, freeCam) in Scene.GetComponents<FreeCamComponent>()) {
+        foreach (var (id, freeCam) in Scene.GetComponents<FreeCam>()) {
 
             var transform = id.EnsureTransform();
             transform = transform.Movement();
@@ -15,9 +15,9 @@ public static class FreeCamSystem {
         }
     }
 
-    extension(TransformComponent transform) {
+    extension(Transform transform) {
 
-        private TransformComponent Movement() {
+        private Transform Movement() {
 
             var input = Vector3.Zero;
             if (Input.IsButtonDown(Button.KeyBoardW)) input.Z++;
@@ -33,7 +33,7 @@ public static class FreeCamSystem {
             return transform;
         }
 
-        private TransformComponent Rotation() {
+        private Transform Rotation() {
 
             var doRotate = Input.IsButtonDown(Button.MouseRight);
             Input.CursorLock = doRotate;

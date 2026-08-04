@@ -41,7 +41,8 @@ internal static partial class ResMan {
             if (resHash.ContainsValue(GetFileNameWithoutExtension(filePath))) continue;
 
             File.Delete(filePath);
-            Console.WriteLine($"Removed import of {GetRelativePath(project.ResGenPath, filePath)}");
+
+            Log.Info($"Removed import of {GetRelativePath(project.ResGenPath, filePath)}");
         }
 
         // Save maps
@@ -76,7 +77,7 @@ internal static partial class ResMan {
                     if (loadedResHash.TryGetValue(relativePath, out var storedHash) && storedHash == hash) continue;
                     await importer.ImportOperation(sourcePath, targetPath);
 
-                    Console.WriteLine($"Imported {relativePath}");
+                    Log.Pass($"Imported {relativePath}");
                 }
             }
         }

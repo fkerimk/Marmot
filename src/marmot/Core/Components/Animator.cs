@@ -1,7 +1,7 @@
 namespace Marmot;
 
 [Component]
-public struct AnimationComponent {
+public struct Animator {
 
     public int Animation;
     public int Speed;

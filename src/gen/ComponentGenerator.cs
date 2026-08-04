@@ -65,6 +65,7 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
                 public {{c.FullyQualifiedName}} Get{{c.PropertyName}}OrDefault() {
                 
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    
                     if (GetComponents.ContainsKey(entity))
                         return GetComponents[entity];
                 
@@ -74,6 +75,7 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
                 public {{c.FullyQualifiedName}} Ensure{{c.PropertyName}}() {
                 
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    
                     if (!GetComponents.ContainsKey(entity))
                         GetComponents[entity] = new {{c.FullyQualifiedName}}();
                 
@@ -83,8 +85,9 @@ public sealed class ComponentGenerator : IIncrementalGenerator  {
                 public {{c.FullyQualifiedName}} Require{{c.PropertyName}}() {
                 
                     var GetComponents = Scene.GetComponents<{{c.FullyQualifiedName}}>();
+                    
                     if (!GetComponents.ContainsKey(entity))
-                        throw new KeyNotFoundException("{{c.PropertyName}} component not found for entity" + entity);
+                        throw Log.ComponentException<{{c.FullyQualifiedName}}>(entity);
                 
                     return GetComponents[entity];
                 }

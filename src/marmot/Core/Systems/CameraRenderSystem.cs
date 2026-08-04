@@ -6,13 +6,13 @@ public static class CameraRenderSystem {
 
     public static void Start() {
 
-        foreach (var (id, camera) in Scene.GetComponents<CameraComponent>())
-            Rl.BeginCamera(camera.RlCamera);
+        foreach (var (id, camera) in Scene.GetComponents<Camera>())
+            Rl.BeginCamera(Camera.GetRlCamera(id));
     }
 
     public static void End() {
 
-        foreach (var (id, model) in Scene.GetComponents<CameraComponent>())
+        foreach (var (id, model) in Scene.GetComponents<Camera>())
             Rl.EndCamera();
     }
 }

@@ -4,13 +4,13 @@ using Raylib_cs;
 namespace Marmot;
 
 [Component]
-public struct TransformComponent(Vector3 pos, Vector3 rot, Vector3 scale) {
+public struct Transform(Vector3 pos, Vector3 rot, Vector3 scale) {
 
     public Vector3 Position = pos;
     public Vector3 Rotation = rot; // degrees: X=pitch, Y=yaw, Z=roll
     public Vector3 Scale = scale;
 
-    public TransformComponent() : this(Vector3.Zero, Vector3.Zero, Vector3.One) { }
+    public Transform() : this(Vector3.Zero, Vector3.Zero, Vector3.One) { }
 
     public void LookAt(Vector3 targetPos) {
 
@@ -41,6 +41,8 @@ public struct TransformComponent(Vector3 pos, Vector3 rot, Vector3 scale) {
     public Vector3 RlForward  => Raymath.Vector3Transform(Vector3.UnitZ, RenderRotation);
     public Vector3 RlRight    => Raymath.Vector3Transform(Vector3.UnitX, RenderRotation);
     public Vector3 RlUp       => Raymath.Vector3Transform(Vector3.UnitY, RenderRotation);
+    public Vector3 RlRotation => Rotation with { Y = -Rotation.Y, Z = -Rotation.Z };
+    public Vector3 RlScale    => Scale;
 
     public Matrix4x4 RlMatrix { get {
 

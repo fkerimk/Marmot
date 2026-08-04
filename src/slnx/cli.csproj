@@ -15,10 +15,18 @@
         <Version>0.0.1</Version>
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
-        <PublishAot>true</PublishAot>
         <ImplicitUsings>enable</ImplicitUsings>
         <TargetFramework>net10.0</TargetFramework>
         <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>false</PublishTrimmed>
+        <PublishSingleFile>true</PublishSingleFile>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>

@@ -5,13 +5,13 @@ using Marmot.Backend.Resources.Types;
 
 namespace Marmot;
 
-public class Shader : Resource {
+public class ShaderRes : Resource {
 
     public override bool RawImportPath => true;
 
     internal Raylib_cs.Shader? RlShader;
 
-    public override void Import(string path) {
+    internal override void Import(string path) {
 
         var vsPath = ResMan.FindResourcePath(path + ".vs", true);
         var fsPath = ResMan.FindResourcePath(path + ".fs", true);

@@ -5,9 +5,12 @@ namespace Marmot;
 
 public static class Res {
 
+    public static ShaderRes MainShader;
+    public static ShaderRes SkinnedMainShader;
+
     private static T Get<T>(string relativePath) where T : Resource, new()
         => (T)ResMan.GetResource<T>(relativePath);
 
-    public static Model GetModel(string path) => Get<Model>(path);
-    public static Shader GetShader(string path) => Get<Shader>(path);
+    public static ModelRes GetModel(string path) => Get<ModelRes>(path);
+    public static ShaderRes GetShader(string path) => Get<ShaderRes>(path);
 }

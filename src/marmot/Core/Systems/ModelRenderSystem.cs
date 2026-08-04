@@ -6,7 +6,17 @@ public static class ModelRenderSystem {
 
     public static void Draw() {
 
-        foreach (var (id, model) in Scene.GetComponents<ModelComponent>())
-            Rl.DrawModel(model, id.GetTransformOrDefault());
+        foreach (var (id, model) in Scene.GetComponents<Model>()) {
+
+            var transform = id.GetTransformOrDefault();
+
+            var scaledTransform = transform with { Scale = transform.Scale * model.Scale };
+            var rlModel = model.RlModel with { Transform = scaledTransform.RlMatrix };
+
+            Pbr.SetNormalMatrix(transform.RlMatrix);
+            Pbr.ApplyUniforms();
+
+            Rl.DrawModel(rlModel);
+        }
     }
 }

@@ -13,11 +13,14 @@ public static class Player {
 
         _isRunning = true;
 
-        Compatibility.Check(debugMode);
-
         await ResMan.LoadPathMap();
 
+        Compatibility.Check(debugMode);
+
         Rl.Init();
+
+        Pbr.LoadMainShaders();
+        MaterialUtils.InitDefaultTextures();
 
         game.Init();
 
@@ -34,18 +37,21 @@ public static class Player {
             FreeCamSystem.Update();
 
             // Render
+            Pbr.Update();
+
             CameraRenderSystem.Start();
             AnimationSystem.Update();
             ModelRenderSystem.Draw();
+            DebugSystem.Debug3D();
             CameraRenderSystem.End();
 
             Rl.EndDrawing();
-
         }
 
         game.Exit();
 
         ResMan.UnloadResources();
+        MaterialUtils.UnloadDefaultTextures();
 
         Rl.Exit();
 

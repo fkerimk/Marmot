@@ -35,6 +35,8 @@ internal static partial class ResMan {
 
         if (ResMap.TryGetValue(relativePath, out var res)) return res;
 
+        Log.Info($"Loading {relativePath}");
+
         var newRes = new T();
         var importPath = newRes.RawImportPath ? relativePath : FindResourcePath(relativePath);
         newRes.Import(importPath);
@@ -46,7 +48,10 @@ internal static partial class ResMan {
 
     internal static void UnloadResources() {
 
-        foreach (var resource in ResMap.Values)
-            resource.Unload();
+        foreach (var res in ResMap) {
+
+            Log.Info($"Unloading {res.Key}");
+            res.Value.Unload();
+        }
     }
 }
