@@ -13,7 +13,7 @@ public static class ModelRenderSystem {
             var scaledTransform = transform with { Scale = transform.Scale * model.Scale };
             var rlModel = model.RlModel with { Transform = scaledTransform.RlMatrix };
 
-            Pbr.SetNormalMatrix(transform.RlMatrix);
+            Pbr.SetNormalMatrix(scaledTransform.RlMatrix);
             Pbr.ApplyUniforms(model);
 
             Rl.DrawModel(rlModel);
