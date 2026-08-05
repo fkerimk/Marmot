@@ -10,12 +10,12 @@ namespace Marmot;
 public unsafe class ModelRes : Resource {
 
     // Model
-    public Raylib_cs.Model RlModel;
-    public BoundingBox Bounds;
-    public M3DMaterialInfo[] MaterialInfo = [];
+    internal Raylib_cs.Model RlModel;
+    internal BoundingBox Bounds;
+    private M3DMaterialInfo[] _materialInfo = [];
 
     // Animations
-    public ModelAnimation* RlAnims;
+    internal ModelAnimation* RlAnims;
     private int _animCount;
 
     internal override void Import(string path) {
@@ -29,26 +29,9 @@ public unsafe class ModelRes : Resource {
 
         var materialJsonPath = path + ".json";
         var materialJson = File.ReadAllText(materialJsonPath);
-        MaterialInfo = JsonConvert.DeserializeObject<M3DMaterialInfo[]>(materialJson);;
+        _materialInfo = JsonConvert.DeserializeObject<M3DMaterialInfo[]>(materialJson) ?? throw Log.InvalidJsonException(materialJsonPath);
 
-        for (var i = 0; i < RlModel.MaterialCount; i++) {
-
-            RlModel.Materials[i].Shader = _animCount > 0 ? Pbr.SkinnedMainShader : Pbr.MainShader;
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Albedo].Texture   , TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Metalness].Texture, TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Normal].Texture   , TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Roughness].Texture, TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Occlusion].Texture, TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Emission].Texture , TextureFilter.Bilinear);
-
-            if (i >= MaterialInfo.Length) continue;
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Albedo   , MaterialInfo[i].HasAlbedo   );
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Metalness, MaterialInfo[i].HasMetallic );
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Normal   , MaterialInfo[i].HasNormal   );
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Roughness, MaterialInfo[i].HasRoughness);
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Occlusion, MaterialInfo[i].HasAo       );
-            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Emission , MaterialInfo[i].HasEmission );
-        }
+        MaterialUtils.FixMaterials(ref RlModel, _animCount > 0, _materialInfo);;
 
         Bounds = GetModelBoundingBox(RlModel);
     }

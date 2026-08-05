@@ -77,8 +77,8 @@ internal static class Pbr {
         MainShader = shader.RlShader.Value;
         SkinnedMainShader = skinShader.RlShader.Value;
 
-        //SetupMaterialMapLocations(ref MainShader);
-        //SetupMaterialMapLocations(ref SkinnedMainShader);
+        SetupMaterialMapLocations(ref MainShader);
+        SetupMaterialMapLocations(ref SkinnedMainShader);
 
         _shaders = [ MainShader, SkinnedMainShader ];
 

@@ -1,9 +1,27 @@
-import bpy
-import json
-import sys
-import os
+import os, sys, json, bpy
 
-def check_node_inputs(mat):
+def TraceForTexture(socket, visited=None):
+    
+    if visited is None: visited = set()
+    if not socket.is_linked: return False
+    
+    for link in socket.links:
+        
+        node = link.from_node
+        
+        if node in visited: continue
+        visited.add(node)
+        
+        if node.type == 'TEX_IMAGE' and node.image: return True
+
+        # Iterate through inputs in reverse order
+        for in_socket in node.inputs:
+            if TraceForTexture(in_socket, visited):
+                return True
+
+    return False
+
+def CheckNodeInputs(mat):
     
     matInfo = {
         
@@ -19,12 +37,7 @@ def check_node_inputs(mat):
     if not mat.use_nodes or not mat.node_tree: return matInfo
 
     # Principled BSDF node
-    bsdfNode = None
-    for node in mat.node_tree.nodes:
-        if node.type == 'BSDF_PRINCIPLED':
-            bsdfNode = node
-            break
-
+    bsdfNode = next((node for node in mat.node_tree.nodes if node.type == 'BSDF_PRINCIPLED'), None)
     if not bsdfNode: return matInfo
 
     # Principled BSDF input sockets
@@ -39,19 +52,12 @@ def check_node_inputs(mat):
 
     for key, socketNames in socketMappings.items():
         for socket_name in socketNames:
-            if socket_name in bsdfNode.inputs and bsdfNode.inputs[socket_name].is_linked:
-                
-                link = bsdfNode.inputs[socket_name].links[0]
-                fromNode = link.from_node
-                
-                if fromNode.type == 'NORMAL_MAP' and fromNode.inputs['Color'].is_linked:
-                    fromNode = fromNode.inputs['Color'].links[0].from_node
-
-                if fromNode.type == 'TEX_IMAGE' and fromNode.image:
+            if socket_name in bsdfNode.inputs:
+                if TraceForTexture(bsdfNode.inputs[socket_name]):
                     matInfo[key] = True
                     break
 
-    # Check Ambient Occlusion/TEX_IMAGE
+    # Check Ambient Occlusion
     for node in mat.node_tree.nodes:
         if node.type == 'AMBIENT_OCCLUSION':
             matInfo["hasAo"] = True
@@ -59,7 +65,7 @@ def check_node_inputs(mat):
 
     return matInfo
 
-def export_file(blend_path, m3d_output_path):
+def ExportFile(blend_path, m3d_output_path):
     
     absBlend = os.path.abspath(blend_path)
     absM3D = os.path.abspath(m3d_output_path)
@@ -76,9 +82,7 @@ def export_file(blend_path, m3d_output_path):
     try: bpy.ops.export_scene.m3d(filepath=absM3D, use_inline=True, use_gridcompress=False)
     except Exception: pass
 
-    materialsData = []
-    
-    for mat in bpy.data.materials: materialsData.append(check_node_inputs(mat))
+    materialsData = [CheckNodeInputs(mat) for mat in bpy.data.materials]
 
     with open(jsonOutputPath, "w", encoding="utf-8") as f:
         json.dump(materialsData, f, indent=4)
@@ -90,10 +94,9 @@ if __name__ == "__main__":
     args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     
     if args and os.path.exists(args[0]):
-        
         with open(args[0], "r", encoding="utf-8") as f:
             targets = json.load(f)
             
         for blendFile, m3dFile in targets.items():
             if os.path.exists(blendFile):
-                export_file(blendFile, m3dFile)
+                ExportFile(blendFile, m3dFile)

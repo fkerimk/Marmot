@@ -9,26 +9,10 @@ public static class Log {
         Console.ResetColor();
     }
 
-    public static void Info(string message) {
-
-        PrintColor($"Info: {message}", ConsoleColor.Blue);
-    }
-
-    public static void Warn(string message) {
-
-        PrintColor($"Warn: {message}", ConsoleColor.Yellow);
-    }
-
-    public static void Pass(string message) {
-
-        PrintColor($"Pass: {message}", ConsoleColor.Green);
-    }
-
-
-    public static void Fail(string message) {
-
-        PrintColor($"Fail: {message}", ConsoleColor.Red);
-    }
+    public static void Info(string message) => PrintColor($"Info: {message}", ConsoleColor.Blue);
+    public static void Warn(string message) => PrintColor($"Warn: {message}", ConsoleColor.Yellow);
+    public static void Pass(string message) => PrintColor($"Pass: {message}", ConsoleColor.Green);
+    public static void Fail(string message) => PrintColor($"Fail: {message}", ConsoleColor.Red);
 
     public static Exception FailException (string message) {
 
@@ -36,8 +20,7 @@ public static class Log {
         return new Exception();
     }
 
-    public static Exception ComponentException<T>(int id) {
-
-        throw FailException($"{typeof(T).Name} with id {id} does not exist");
-    }
+    public static Exception ComponentException<T>(int id) => throw FailException($"{typeof(T).Name} with id {id} does not exist");
+    public static Exception InvalidJsonException(string file) => throw FailException($"Invalid json file: {file}");
+    public static Exception MaterialException() => throw FailException("Material doesn't exist");
 }

@@ -12,3 +12,6 @@ __pycache__/
 
 # Script maintained
 /lib/raylib/
+
+# Dotnet
+*.DotSettings.user
