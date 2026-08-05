@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Marmot.Backend.Projects;
+using Newtonsoft.Json;
 
 namespace Marmot.Backend.Resources.Importers;
 
@@ -7,15 +9,24 @@ internal class BlenderImporter : Importer {
     public override string[] SupportedExtensions() => [ ".blend" ];
     public override string GetTargetExtension(string sourceExtension) =>  ".m3d" ;
 
-    public override async Task ImportOperation(string sourcePath, string targetPath) {
+    public override async Task ImportOperation(Project project, ImportSource[] sources) {
 
-        var dir = Path.GetDirectoryName(sourcePath);
+        var map = new Dictionary<string, string>();
+
+        foreach (var source in sources) {
+
+            map.Add(source.SourcePath, source.TargetPath);
+        }
+
+        var json = JsonConvert.SerializeObject(map, Formatting.Indented);
+
+        await File.WriteAllTextAsync(project.ResTargetsPath, json);
 
         var startInfo = new ProcessStartInfo {
 
             FileName = "blender",
-            Arguments = $"-b \"{sourcePath}\" --python \"{Path.Join(AppContext.BaseDirectory, "lib/io_scene_m3d.py")}\" --python-expr \"import bpy; bpy.ops.export_scene.m3d(filepath='{targetPath}', use_inline=True, use_gridcompress=False)\"",
-            WorkingDirectory = dir,
+            Arguments = $"-b --factory-startup -noaudio -P \"{PathM.LibPath("batch_exporter.py")}\" -- \"{project.ResTargetsPath}\"",
+            WorkingDirectory = AppContext.BaseDirectory,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -26,12 +37,8 @@ internal class BlenderImporter : Importer {
 
         if (process != null) {
 
-            process.OutputDataReceived += (s, e) => {
-                if (e.Data != null) Console.WriteLine(e.Data);
-            };
-            process.ErrorDataReceived += (s, e) => {
-                if (e.Data != null) Console.Error.WriteLine(e.Data);
-            };
+            //process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+            //process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -41,4 +48,6 @@ internal class BlenderImporter : Importer {
             var exitCode = process.ExitCode;
         }
     }
+
+    public override string[] GetSideKicks(Project project, ImportSource source) => [ source.TargetRelativePath + ".json" ];
 }

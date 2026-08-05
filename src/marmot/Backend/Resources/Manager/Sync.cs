@@ -29,6 +29,8 @@ internal static partial class ResMan {
         var resMap = new Dictionary<string, string>();
         var resHash = new Dictionary<string, string>();
 
+        var sidekicks = new List<string>();
+
         await ImportResources(project.ResPath);
         await ImportResources(Join(AppContext.BaseDirectory, "res"));
 
@@ -40,9 +42,12 @@ internal static partial class ResMan {
             if (filePath == project.ResMapPath) continue;
             if (resHash.ContainsValue(GetFileNameWithoutExtension(filePath))) continue;
 
+            var relativePath = GetRelativePath(project.ResGenPath, filePath);
+            if (sidekicks.Contains(relativePath)) continue;
+
             File.Delete(filePath);
 
-            Log.Info($"Removed import of {GetRelativePath(project.ResGenPath, filePath)}");
+            Log.Info($"Removed import of {relativePath}");
         }
 
         // Save maps
@@ -56,29 +61,63 @@ internal static partial class ResMan {
 
         async Task ImportResources(string path) {
 
+            Log.Info($"Importing resources in {path}");
+
             var sourceFiles = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
 
-            foreach (var sourcePath in sourceFiles) {
+            foreach (var importer in importers) {
 
-                var relativePath = GetRelativePath(path, sourcePath);
-                var ext = GetExtension(sourcePath);
-                var hash = await FileM.GetHash(sourcePath);
+                var importerName = importer.GetType().Name;
 
-                foreach (var importer in importers) {
+                var importSources = new List<ImportSource>();
+                var markedImportSources = new List<ImportSource>();
+
+                foreach (var sourcePath in sourceFiles) {
+
+                    var relativePath = GetRelativePath(path, sourcePath);
+                    var ext = GetExtension(sourcePath);
+                    var hash = await FileM.GetHash(sourcePath);
 
                     if (!importer.SupportedExtensions().Contains(ext)) continue;
 
                     var targetFile = hash + importer.GetTargetExtension(ext);
                     var targetPath = Combine(project.ResGenPath, targetFile);
 
+                    var importSource = new ImportSource {
+
+                        SourcePath = sourcePath,
+                        TargetPath = targetPath,
+
+                        SourceRelativePath = relativePath,
+                        TargetRelativePath = targetFile
+                    };
+
+                    importSources.Add(importSource);
+
                     resMap[relativePath] = targetFile;
                     resHash[relativePath] = hash;
 
                     if (loadedResHash.TryGetValue(relativePath, out var storedHash) && storedHash == hash) continue;
-                    await importer.ImportOperation(sourcePath, targetPath);
 
-                    Log.Pass($"Imported {relativePath}");
+                    markedImportSources.Add(importSource);
+
+                    Log.Info($"Marked {relativePath} for {importerName}");
                 }
+
+                foreach (var importSource in importSources)
+                    sidekicks.AddRange(importer.GetSideKicks(project, importSource));
+
+                if (markedImportSources.Count == 0) {
+
+                    Log.Info($"Skipping {importerName}");
+                    continue;
+                }
+
+                Log.Info($"Running {importerName}");
+
+                await importer.ImportOperation(project, markedImportSources.ToArray());
+
+                Log.Info($"Finished {importerName}");
             }
         }
     }

@@ -1,7 +1,8 @@
-using Marmot.Backend.Rendering;
+using Newtonsoft.Json;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
+using Marmot.Backend.Rendering;
 using Marmot.Backend.Resources.Types;
 
 namespace Marmot;
@@ -24,6 +25,21 @@ public unsafe class ModelRes : Resource {
         // Mikktspace tangent4 (xyz = tangent, w = bitangent sign)
         for (var m = 0; m < RlModel.MeshCount; m++)
             GenMeshTangents(ref RlModel.Meshes[m]);
+
+        var materialJsonPath = path + ".json";
+        var materialJson = File.ReadAllText(materialJsonPath);
+        var materialInfo = JsonConvert.DeserializeObject<List<M3DMaterialInfo>>(materialJson);;
+
+        //Log.Info($"{path} - {materialInfo.Count} Materials");
+        //for (var i = 0; i < materialInfo.Count; i++) {
+        //    Log.Info($"  {i}. {materialInfo[i].Name}");
+        //    Log.Info($"\t  HasAlbedo    : {materialInfo[i].HasAlbedo}");
+        //    Log.Info($"\t  HasNormal    : {materialInfo[i].HasNormal}");
+        //    Log.Info($"\t  HasRoughness : {materialInfo[i].HasRoughness}");
+        //    Log.Info($"\t  HasMetallic  : {materialInfo[i].HasMetallic}");
+        //    Log.Info($"\t  HasEmission  : {materialInfo[i].HasEmission}");
+        //    Log.Info($"\t  HasAo        : {materialInfo[i].HasAo}");
+        //}
 
         MaterialUtils.EnsureModelMaterialDefaults(ref RlModel);
 

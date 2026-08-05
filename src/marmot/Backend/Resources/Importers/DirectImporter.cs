@@ -1,3 +1,5 @@
+using Marmot.Backend.Projects;
+
 namespace Marmot.Backend.Resources.Importers;
 
 internal class DirectImporter : Importer {
@@ -5,10 +7,13 @@ internal class DirectImporter : Importer {
     public override string[] SupportedExtensions()  => [ ".vs", ".fs" ];
     public override string GetTargetExtension(string sourceExtension) => sourceExtension;
 
-    public override async Task ImportOperation(string sourcePath, string targetPath) {
+    public override async Task ImportOperation(Project project, ImportSource[] sources) {
 
-        await using var sourceStream = File.OpenRead(sourcePath);
-        await using var targetStream = File.Create(targetPath);
-        await sourceStream.CopyToAsync(targetStream);
+        foreach (var source in sources) {
+
+            await using var sourceStream = File.OpenRead(source.SourcePath);
+            await using var targetStream = File.Create(source.TargetPath);
+            await sourceStream.CopyToAsync(targetStream);
+        }
     }
 }

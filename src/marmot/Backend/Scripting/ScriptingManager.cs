@@ -67,6 +67,7 @@ public static class ScriptingManager {
                         
                         <ItemGroup Condition="'$(includeLibs)' == 'true'">
                             <PackageReference Include="Raylib-cs" Version="8.0.0" />
+                            <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
                         </ItemGroup>
                         
                         <Target Name="CustomRaylibBuild" AfterTargets="Build">

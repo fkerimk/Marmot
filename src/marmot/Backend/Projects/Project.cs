@@ -19,6 +19,7 @@ public class Project() {
     [JsonIgnore] public string ResGenPath { get; private set; } = null!;
     [JsonIgnore] public string ResMapPath { get; private set; } = null!;
     [JsonIgnore] public string ResHashPath { get; private set; } = null!;
+    [JsonIgnore] public string ResTargetsPath { get; private set; } = null!;
 
     [JsonIgnore] public string SrcPath { get; private set; } = null!;
     [JsonIgnore] public string SrcGenPath { get; private set; } = null!;
@@ -47,6 +48,7 @@ public class Project() {
         ResGenPath = Join(DotPath, "res");
         ResMapPath = Join(ResGenPath, "map.json");
         ResHashPath = Join(DotPath, "hash.json");
+        ResTargetsPath = Join(DotPath, "targets.json");
 
         SrcPath = Join(path, "src");
         SrcGenPath = Join(DotPath, "src");

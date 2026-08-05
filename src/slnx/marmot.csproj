@@ -24,6 +24,7 @@
     <ItemGroup>
         <PackageReference Include="Raylib-cs" Version="8.0.0" />
         <PackageReference Include="rlImgui-cs" Version="3.2.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <ProjectReference Include="gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <Compile Include="../marmot/**/*.cs" Link="marmot/%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>

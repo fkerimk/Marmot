@@ -171,10 +171,6 @@ internal static class Pbr {
             _useTexOcclusionLoc[s]   = GetShaderLocation(rl, "useTexOcclusion");
             _useTexEmissiveLoc[s]    = GetShaderLocation(rl, "useTexEmissive");
         }
-
-        Console.WriteLine($"lightsCountLoc[0]={_lightsCountLoc[0]} lightsCountLoc[1]={_lightsCountLoc[1]}");
-        Console.WriteLine($"posLoc[0,0]={_posLoc[0,0]} posLoc[1,0]={_posLoc[1,0]}");
-        Console.WriteLine($"matNormalLoc[0]={_matNormalLoc[0]} matNormalLoc[1]={_matNormalLoc[1]}");
     }
 
     private static unsafe void SetupMaterialMapLocations(ref Shader shader) {

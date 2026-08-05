@@ -100,7 +100,8 @@ internal static unsafe class MaterialUtils {
         if (textureId > 0 && textureId != GetTextureIdDefault()) return;
 
         mat.Maps[(int)index].Texture = defaultTex;
-        Log.Info(index + " texture assigned to " + mat.Maps[(int)index].Texture.Id);
+
+        //Log.Info(index + " texture assigned to " + mat.Maps[(int)index].Texture.Id);
     }
 
     private static void DetachIfDefault(ref Material mat, MaterialMapIndex index) {

@@ -6,7 +6,7 @@ public static class Log {
 
         if (color.HasValue) Console.ForegroundColor = color.Value;
         Console.WriteLine(message);
-        if (color.HasValue) Console.ResetColor();
+        Console.ResetColor();
     }
 
     public static void Info(string message) {
