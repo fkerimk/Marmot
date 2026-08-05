@@ -12,6 +12,7 @@ public unsafe class ModelRes : Resource {
     // Model
     public Raylib_cs.Model RlModel;
     public BoundingBox Bounds;
+    public M3DMaterialInfo[] MaterialInfo = [];
 
     // Animations
     public ModelAnimation* RlAnims;
@@ -28,31 +29,25 @@ public unsafe class ModelRes : Resource {
 
         var materialJsonPath = path + ".json";
         var materialJson = File.ReadAllText(materialJsonPath);
-        var materialInfo = JsonConvert.DeserializeObject<List<M3DMaterialInfo>>(materialJson);;
-
-        //Log.Info($"{path} - {materialInfo.Count} Materials");
-        //for (var i = 0; i < materialInfo.Count; i++) {
-        //    Log.Info($"  {i}. {materialInfo[i].Name}");
-        //    Log.Info($"\t  HasAlbedo    : {materialInfo[i].HasAlbedo}");
-        //    Log.Info($"\t  HasNormal    : {materialInfo[i].HasNormal}");
-        //    Log.Info($"\t  HasRoughness : {materialInfo[i].HasRoughness}");
-        //    Log.Info($"\t  HasMetallic  : {materialInfo[i].HasMetallic}");
-        //    Log.Info($"\t  HasEmission  : {materialInfo[i].HasEmission}");
-        //    Log.Info($"\t  HasAo        : {materialInfo[i].HasAo}");
-        //}
-
-        MaterialUtils.EnsureModelMaterialDefaults(ref RlModel);
+        MaterialInfo = JsonConvert.DeserializeObject<M3DMaterialInfo[]>(materialJson);;
 
         for (var i = 0; i < RlModel.MaterialCount; i++) {
 
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Albedo].Texture, TextureFilter.Bilinear);
+            RlModel.Materials[i].Shader = _animCount > 0 ? Pbr.SkinnedMainShader : Pbr.MainShader;
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Albedo].Texture   , TextureFilter.Bilinear);
             SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Metalness].Texture, TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Normal].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Normal].Texture   , TextureFilter.Bilinear);
             SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Roughness].Texture, TextureFilter.Bilinear);
             SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Occlusion].Texture, TextureFilter.Bilinear);
-            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Emission].Texture, TextureFilter.Bilinear);
+            SetTextureFilter(RlModel.Materials[i].Maps[(int)MaterialMapIndex.Emission].Texture , TextureFilter.Bilinear);
 
-            RlModel.Materials[i].Shader = _animCount > 0 ? Pbr.SkinnedMainShader : Pbr.MainShader;
+            if (i >= MaterialInfo.Length) continue;
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Albedo   , MaterialInfo[i].HasAlbedo   );
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Metalness, MaterialInfo[i].HasMetallic );
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Normal   , MaterialInfo[i].HasNormal   );
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Roughness, MaterialInfo[i].HasRoughness);
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Occlusion, MaterialInfo[i].HasAo       );
+            MaterialUtils.AssignDefault(ref RlModel.Materials[i], MaterialMapIndex.Emission , MaterialInfo[i].HasEmission );
         }
 
         Bounds = GetModelBoundingBox(RlModel);
@@ -61,7 +56,6 @@ public unsafe class ModelRes : Resource {
     public override void Unload() {
 
         UnloadModelAnimations(RlAnims, _animCount);
-        MaterialUtils.DetachModelMaterialDefaults(ref RlModel);
         UnloadModel(RlModel);
     }
 }
