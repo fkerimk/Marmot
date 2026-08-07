@@ -17,8 +17,13 @@ public static class DebugSystem {
 
     private static void DrawModels() {
 
-        foreach (var (id, model) in Scene.GetComponents<Model>())
-            Rl.DrawBounds(model.Resource.Bounds.Transform(id.GetTransformOrDefault()), White);
+        foreach (var (id, model) in Scene.GetComponents<Model>()) {
+
+            var transform = id.GetTransformOrDefault();
+            transform.Scale *= model.Scale;
+
+            Rl.DrawBounds(model.Resource.Bounds.Transform(transform), White);
+        }
     }
 
     private static void DrawLights() {

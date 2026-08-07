@@ -16,12 +16,12 @@ public unsafe class ModelRes : Resource {
 
     // Animations
     internal ModelAnimation* RlAnims;
-    private int _animCount;
+    internal int AnimCount;
 
     internal override void Import(string path) {
 
         RlModel = LoadModel(path);
-        RlAnims = LoadModelAnimations(path, ref _animCount);
+        RlAnims = LoadModelAnimations(path, ref AnimCount);
 
         // Mikktspace tangent4 (xyz = tangent, w = bitangent sign)
         for (var m = 0; m < RlModel.MeshCount; m++)
@@ -31,14 +31,14 @@ public unsafe class ModelRes : Resource {
         var materialJson = File.ReadAllText(materialJsonPath);
         _materialInfo = JsonConvert.DeserializeObject<M3DMaterialInfo[]>(materialJson) ?? throw Log.InvalidJsonException(materialJsonPath);
 
-        MaterialUtils.FixMaterials(ref RlModel, _animCount > 0, _materialInfo);;
+        MaterialUtils.FixMaterials(ref RlModel, AnimCount > 0, _materialInfo);;
 
         Bounds = GetModelBoundingBox(RlModel);
     }
 
     public override void Unload() {
 
-        UnloadModelAnimations(RlAnims, _animCount);
+        UnloadModelAnimations(RlAnims, AnimCount);
         UnloadModel(RlModel);
     }
 }

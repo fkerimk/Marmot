@@ -11,7 +11,7 @@ internal class DirectImporter : Importer {
 
         foreach (var source in sources) {
 
-            await using var sourceStream = File.OpenRead(source.SourcePath);
+            await using var sourceStream = File.OpenRead(source.SrcPath);
             await using var targetStream = File.Create(source.TargetPath);
             await sourceStream.CopyToAsync(targetStream);
         }

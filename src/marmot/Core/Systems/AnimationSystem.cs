@@ -6,10 +6,10 @@ public static unsafe class AnimationSystem {
 
     public static void Update() {
 
-        foreach (var (id, animation) in Scene.GetComponents<Animator>()) {
+        foreach (var (id, animator) in Scene.GetComponents<Animator>()) {
 
             var model = id.RequireModel();
-            var anim = id.GetAnimator();
+            var anim = animator;
 
             anim.Timer += Time.Delta;
 

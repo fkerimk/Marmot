@@ -1,6 +1,6 @@
-﻿using Marmot.Backend.Projects;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
+
+using Marmot.Backend.Projects;
 using static Marmot.Backend.Projects.ProjectManager;
 
 namespace Marmot;
@@ -8,9 +8,10 @@ namespace Marmot;
 internal static class Cli {
 
     private static string FixedArg(string arg) => arg.TrimStart('"').TrimEnd('"').Trim();
+    private static Project GetProject(string name) => FindProject(FixedArg(name));
 
-    private static PropertyInfo? GetProp<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>(string name)
-        => typeof(T).GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public);
+    private static PropertyInfo? GetProp<T>(string name)
+        => typeof(T).GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
     public static async Task Main(string[] args) {
 
@@ -41,14 +42,14 @@ internal static class Cli {
 
                 case ["project", "create", var name]: { await Create(name); break; }
 
-                case ["project", var name, "run"]: { await Run(FindProject(FixedArg(name))); break; }
+                case ["project", var name, "run"]: { await Run(GetProject(name)); break; }
 
-                case ["project", var name, "build"]: { await ProjectBuilder.Build(FindProject(FixedArg(name))); break; }
+                case ["project", var name, "build"]: { await ProjectBuilder.Build(GetProject(name)); break; }
 
                 case ["project", var name, "get", var field]: {
 
-                    var prop = typeof(Project).GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                    Console.WriteLine(prop?.GetValue(FindProject(FixedArg(name))) ?? throw new InvalidOperationException($"There is no {field} in {name}"));
+                    var prop = typeof(Project).GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    Console.WriteLine(prop?.GetValue(GetProject(name)) ?? throw new InvalidOperationException($"There is no {field} in {name}"));
 
                     break;
                 }
@@ -58,6 +59,11 @@ internal static class Cli {
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(e.Message);
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(e.StackTrace);
+
             Console.ResetColor();
 
             Environment.Exit(1);

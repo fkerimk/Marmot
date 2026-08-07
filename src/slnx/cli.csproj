@@ -36,9 +36,9 @@
 
     <Target Name="CopyBuild" AfterTargets="Publish">
         <ItemGroup>
-            <BuildFile Include=".sln/cli/build/cli" />
+            <BuildFiles Include=".sln/cli/build/*" />
         </ItemGroup>
-        <Copy SourceFiles="@(BuildFile)" DestinationFiles="../../build/marmot" />
+        <Copy SourceFiles="@(BuildFiles)" DestinationFolder="../../build" />
     </Target>
 
     <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

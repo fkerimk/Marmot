@@ -15,7 +15,7 @@ internal class BlenderImporter : Importer {
 
         foreach (var source in sources) {
 
-            map.Add(source.SourcePath, source.TargetPath);
+            map.Add(source.SrcPath, source.TargetPath);
         }
 
         var json = JsonConvert.SerializeObject(map, Formatting.Indented);
@@ -25,8 +25,8 @@ internal class BlenderImporter : Importer {
         var startInfo = new ProcessStartInfo {
 
             FileName = "blender",
-            Arguments = $"-b --factory-startup -noaudio -P \"{PathM.LibPath("batch_exporter.py")}\" -- \"{project.ResTargetsPath}\"",
-            WorkingDirectory = AppContext.BaseDirectory,
+            Arguments = $"-b --factory-startup -noaudio -P \"{PathM.GetPyPath("M3DProcessor")}\" -- \"{project.ResTargetsPath}\" \"{PathM.PyPath}\"",
+            WorkingDirectory = PathM.BasePath,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -39,15 +39,16 @@ internal class BlenderImporter : Importer {
 
             //process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
             //process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
-
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-
             await process.WaitForExitAsync();
-
-            var exitCode = process.ExitCode;
         }
     }
 
-    public override string[] GetSideKicks(Project project, ImportSource source) => [ source.TargetRelativePath + ".json" ];
+    public override string[] GetImportSideKicks(Project project, ImportSource source) =>
+        Directory.GetFiles(Path.GetDirectoryName(source.SrcPath)!, $"{Path.GetFileName(source.SrcPath)}@*.fbx")
+            .Select(p => Path.GetRelativePath(source.SrcResPath, p))
+            .ToArray();
+
+    public override string[] GetExportSideKicks(Project project, ImportSource source) => [ source.TargetPath + ".json" ];
 }

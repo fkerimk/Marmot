@@ -1,14 +1,17 @@
 namespace Marmot;
 
-public static class PathM {
+internal static class PathM {
 
-    public static string BasePath(string relativePath)
-        => Path.Join(AppContext.BaseDirectory, relativePath);
+    internal static string BasePath => AppContext.BaseDirectory;
+    internal static string GetBasePath(string relativePath) => Path.Join(BasePath, relativePath);
 
-    public static string LibPath(string relativePath)
-        => Path.Join(BasePath("lib"), relativePath);
+    internal static string LibPath => GetBasePath("lib");
+    internal static string GetLibPath(string relativePath) => Path.Join(LibPath, relativePath);
 
-    public static string? SearchPath(string basePath, string search, int depth) {
+    internal static string PyPath => GetLibPath("py");
+    internal static string GetPyPath(string relativePath) => Path.Join(PyPath, relativePath + ".py");
+
+    internal static string? SearchPath(string basePath, string search, int depth) {
 
         var current = basePath;
 

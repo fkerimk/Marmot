@@ -9,5 +9,6 @@ internal abstract class Importer {
 
     public abstract Task ImportOperation(Project project, ImportSource[] sources);
 
-    public virtual string[] GetSideKicks(Project project, ImportSource source) => [];
+    public virtual string[] GetImportSideKicks(Project project, ImportSource source) => [];
+    public virtual string[] GetExportSideKicks(Project project, ImportSource source) => [];
 }

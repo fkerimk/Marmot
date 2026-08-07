@@ -30,7 +30,7 @@ public static partial class Extensions {
         hex = '#' + hex.TrimStart('#').ToLowerInvariant();
 
         var color = ColorTranslator.FromHtml(hex);
-        var vector = new Vector4(color.R, color.G, color.B, color.A);
+        var vector = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
 
         return vector;
     }
@@ -45,8 +45,8 @@ public static partial class Extensions {
 
     extension(Vector4 color) {
 
-        public RlColor ToRlColor() => new((byte)color.X, (byte)color.Y, (byte)color.Z, (byte)color.W);
-        public Vector4 ToImColor() => new(color.X / 255f, color.Y / 255f, color.Z / 255f, color.W / 255f);
+        public RlColor ToRlColor() => new(color.X, color.Y, color.Z, color.W);
+        public Vector4 ToImColor() => new(color.X, color.Y, color.Z, color.W);
     }
 
     extension(Vector4[] colors) {

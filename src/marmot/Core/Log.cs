@@ -21,6 +21,7 @@ public static class Log {
     }
 
     public static Exception ComponentException<T>(int id) => throw FailException($"{typeof(T).Name} with id {id} does not exist");
-    public static Exception InvalidJsonException(string file) => throw FailException($"Invalid json file: {file}");
+    public static Exception InvalidJsonException(string path) => throw FailException($"Invalid json file: {path}");
+    public static Exception FileException(string path) => throw FailException($"File does not exist or invalid: {path}");
     public static Exception MaterialException() => throw FailException("Material doesn't exist");
 }

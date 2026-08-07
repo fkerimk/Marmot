@@ -3,7 +3,7 @@ using Marmot.Backend.Resources;
 
 namespace Marmot.Backend.Player;
 
-public static class Player {
+public static class MainLoop {
 
     private static bool _isRunning;
 

@@ -1,4 +1,4 @@
-using System.Text.Json;
+using Newtonsoft.Json;
 using static System.IO.Path;
 
 using Marmot.Backend.Resources.Types;
@@ -16,10 +16,7 @@ internal static partial class ResMan {
     internal static async Task LoadPathMap() {
 
         var path = Join(ResPath, "map.json");
-
-        PathMap = File.Exists(path)
-            ? JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync(path), JsonContext.Default.DictionaryStringString) ?? new()
-            : new Dictionary<string, string>();
+        PathMap = JsonConvert.DeserializeObject<Dictionary<string, string>>(await File.ReadAllTextAsync(path)) ?? throw Log.InvalidJsonException(path);
     }
 
     internal static string FindResourcePath(string relativePath, bool safe = false) {

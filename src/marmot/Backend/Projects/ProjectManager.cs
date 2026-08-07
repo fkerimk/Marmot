@@ -1,17 +1,18 @@
 using System.Data;
-using System.Text.Json;
+using Newtonsoft.Json;
+using static System.Text.RegularExpressions.Regex;
+
 using Marmot.Backend.Resources;
 using Marmot.Backend.Scripting;
-using static System.Text.RegularExpressions.Regex;
 
 namespace Marmot.Backend.Projects;
 
 public static class ProjectManager {
 
     // Private
-    private static string FindProjectsPath()
-        => PathM.SearchPath(AppContext.BaseDirectory, "projects", 4)
-           ?? throw new DirectoryNotFoundException("Projects folder not found");
+    private static string FindProjectsPath() =>
+        PathM.SearchPath(AppContext.BaseDirectory, "projects", 4)
+        ?? throw new DirectoryNotFoundException("Projects folder not found");
 
     private static Project GetProject(string path) {
 
@@ -19,25 +20,23 @@ public static class ProjectManager {
 
         var jsonPath = Path.Join(path, "project.json");
 
-        if (!File.Exists(jsonPath)) throw new FileNotFoundException("Project file not found", jsonPath);
+        if (!File.Exists(jsonPath)) throw Log.FileException(jsonPath);
 
         var json = File.ReadAllText(jsonPath);
-        var project = JsonSerializer.Deserialize<Project>(json, JsonContext.Default.Project) ?? throw new InvalidOperationException("Invalid project file");
-
-        project.Populate(path);
+        var project = JsonConvert.DeserializeObject<Project>(json);
+        project.Path = path;
 
         return project;
     }
 
-    private static string GetProjectPath(string path)
-        => Path.Join(FindProjectsPath(), path);
+    private static string GetProjectPath(string path) => Path.Join(FindProjectsPath(), path);
 
     // Public
-    public static Project[] GetProjects()
-        => Directory.GetDirectories(FindProjectsPath(), "*", SearchOption.TopDirectoryOnly).Select(GetProject).ToArray();
+    public static Project[] GetProjects() =>
+        Directory.GetDirectories(FindProjectsPath(), "*", SearchOption.TopDirectoryOnly).Select(GetProject).ToArray();
 
-    public static Project FindProject(string project)
-        => project.All(char.IsDigit) ? GetProjects()[int.Parse(project)] : GetProject(GetProjectPath(project));
+    public static Project FindProject(string project) =>
+        project.All(char.IsDigit) ? GetProjects()[int.Parse(project)] : GetProject(GetProjectPath(project));
 
     public static async Task Create(string name) {
 
@@ -50,10 +49,14 @@ public static class ProjectManager {
 
         // Project
         Directory.CreateDirectory(path);
-        var project = new Project(path, name);
+        var project = new Project {
+
+            Name = name,
+            Path = path
+        };
 
         // Project json
-        var json = JsonSerializer.Serialize(project, JsonContext.Default.Project);
+        var json = JsonConvert.SerializeObject(project, Formatting.Indented);
         await File.WriteAllTextAsync(Path.Join(path, "project.json"), json);
 
         // Generate project files

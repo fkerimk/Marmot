@@ -1,5 +1,4 @@
-using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 using static System.IO.Path;
 
 using Marmot.Backend.Projects;
@@ -9,27 +8,25 @@ namespace Marmot.Backend.Resources;
 
 internal static partial class ResMan {
 
+    private static readonly Importer[] Importers = [
+
+        new BlenderImporter(),
+        new DirectImporter()
+    ];
+
     internal static async Task Sync(Project project) {
-
-        var importers = new Importer[] {
-
-            new BlenderImporter(),
-            new DirectImporter(),
-        };
 
         // Ensure directories
         Directory.CreateDirectory(project.ResPath);
-        Directory.CreateDirectory(project.DotPath);
         Directory.CreateDirectory(project.ResGenPath);
 
-        var loadedResHash = File.Exists(project.ResHashPath)
-            ? JsonSerializer.Deserialize<Dictionary<string, string>>(await File.ReadAllTextAsync(project.ResHashPath), JsonContext.Default.DictionaryStringString) ?? new()
-            : new Dictionary<string, string>();
+        var existResData = File.Exists(project.ResDataPath)
+            ? JsonConvert.DeserializeObject<Dictionary<string, ResData>>(await File.ReadAllTextAsync(project.ResDataPath)) ?? throw Log.InvalidJsonException(project.ResDataPath)
+            : new Dictionary<string, ResData>();
 
         var resMap = new Dictionary<string, string>();
-        var resHash = new Dictionary<string, string>();
-
-        var sidekicks = new List<string>();
+        var resData = new Dictionary<string, ResData>();
+        var keepFiles = new List<string> { project.ResMapPath, project.ResDataPath };
 
         await ImportResources(project.ResPath);
         await ImportResources(Join(AppContext.BaseDirectory, "res"));
@@ -39,23 +36,18 @@ internal static partial class ResMan {
 
         foreach (var filePath in targetFiles) {
 
-            if (filePath == project.ResMapPath) continue;
-            if (resHash.ContainsValue(GetFileNameWithoutExtension(filePath))) continue;
-
             var relativePath = GetRelativePath(project.ResGenPath, filePath);
-            if (sidekicks.Contains(relativePath)) continue;
-
+            if (keepFiles.Contains(filePath)) continue;
             File.Delete(filePath);
-
             Log.Info($"Removed import of {relativePath}");
         }
 
         // Save maps
-        var resMapJson = JsonSerializer.Serialize(resMap, JsonContext.Default.DictionaryStringString);
-        var resHashJson = JsonSerializer.Serialize(resHash, JsonContext.Default.DictionaryStringString);
+        var resMapJson = JsonConvert.SerializeObject(resMap, Formatting.Indented);
+        var resDataJson = JsonConvert.SerializeObject(resData, Formatting.Indented);
 
-        await File.WriteAllTextAsync(project.ResMapPath, resMapJson, Encoding.UTF8);
-        await File.WriteAllTextAsync(project.ResHashPath, resHashJson, Encoding.UTF8);
+        await File.WriteAllTextAsync(project.ResMapPath, resMapJson);
+        await File.WriteAllTextAsync(project.ResDataPath, resDataJson);
 
         return;
 
@@ -65,12 +57,10 @@ internal static partial class ResMan {
 
             var sourceFiles = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
 
-            foreach (var importer in importers) {
+            foreach (var importer in Importers) {
 
                 var importerName = importer.GetType().Name;
-
-                var importSources = new List<ImportSource>();
-                var markedImportSources = new List<ImportSource>();
+                var markedSources = new List<ImportSource>();
 
                 foreach (var sourcePath in sourceFiles) {
 
@@ -85,38 +75,54 @@ internal static partial class ResMan {
 
                     var importSource = new ImportSource {
 
-                        SourcePath = sourcePath,
-                        TargetPath = targetPath,
+                        SrcPath = sourcePath,
+                        SrcRelPath = relativePath,
+                        SrcResPath = project.ResPath,
 
-                        SourceRelativePath = relativePath,
-                        TargetRelativePath = targetFile
+                        TargetPath = targetPath,
+                        TargetRelPath = targetFile,
+                        TargetResPath = project.ResGenPath
                     };
 
-                    importSources.Add(importSource);
+                    var sidekicks = (await Task.WhenAll(
+                        importer.GetImportSideKicks(project, importSource)
+                            .Select(async relPath => KeyValuePair.Create(
+                                relPath,
+                                await FileM.GetHash(Combine(importSource.SrcResPath, relPath))
+                            ))
+                    )).ToDictionary(x => x.Key, x => x.Value);
+
 
                     resMap[relativePath] = targetFile;
-                    resHash[relativePath] = hash;
 
-                    if (loadedResHash.TryGetValue(relativePath, out var storedHash) && storedHash == hash) continue;
+                    resData[relativePath] = new ResData {
 
-                    markedImportSources.Add(importSource);
+                        Hash = hash,
+                        Sidekicks = sidekicks
+                    };
+
+                    keepFiles.Add(targetPath);
+                    keepFiles.AddRange(importer.GetExportSideKicks(project, importSource));
+
+                    if (existResData.TryGetValue(relativePath, out var storedData)
+                        && storedData.Hash == hash
+                        && sidekicks.Count == storedData.Sidekicks.Count
+                        && !sidekicks.Except(storedData.Sidekicks).Any())
+                        continue;
+
+                    markedSources.Add(importSource);
 
                     Log.Info($"Marked {relativePath} for {importerName}");
                 }
 
-                foreach (var importSource in importSources)
-                    sidekicks.AddRange(importer.GetSideKicks(project, importSource));
-
-                if (markedImportSources.Count == 0) {
+                if (markedSources.Count == 0) {
 
                     Log.Info($"Skipping {importerName}");
                     continue;
                 }
 
                 Log.Info($"Running {importerName}");
-
-                await importer.ImportOperation(project, markedImportSources.ToArray());
-
+                await importer.ImportOperation(project, markedSources.ToArray());
                 Log.Info($"Finished {importerName}");
             }
         }

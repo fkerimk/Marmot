@@ -2,9 +2,11 @@ namespace Marmot.Backend.Resources.Importers;
 
 public struct ImportSource {
 
-    public required string SourcePath;
-    public required string TargetPath;
+    public required string SrcPath;
+    public required string SrcRelPath;
+    public required string SrcResPath;
 
-    public required string TargetRelativePath;
-    public required string SourceRelativePath;
+    public required string TargetPath;
+    public required string TargetRelPath;
+    public required string TargetResPath;
 }

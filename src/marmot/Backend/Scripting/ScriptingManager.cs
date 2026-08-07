@@ -58,9 +58,9 @@ public static class ScriptingManager {
 
                         <ItemGroup>
                             <Reference Include="marmot">
-                                <HintPath>{PathM.LibPath("marmot.dll")}</HintPath>
+                                <HintPath>{PathM.GetLibPath("marmot.dll")}</HintPath>
                             </Reference>
-                            <Analyzer Include="{PathM.LibPath("gen.dll")}" />
+                            <Analyzer Include="{PathM.GetLibPath("gen.dll")}" />
                             <Compile Include="{project.SrcPath}/**/*.cs" />
                             <Compile Include="{project.SrcGenPath}/{project.Pascal}Entry.cs" Visible="false" />
                         </ItemGroup>
@@ -71,11 +71,11 @@ public static class ScriptingManager {
                         </ItemGroup>
                         
                         <Target Name="CustomRaylibBuild" AfterTargets="Build">
-                            <Copy SourceFiles="{PathM.LibPath("libraylib.so")}"
+                            <Copy SourceFiles="{PathM.GetLibPath("libraylib.so")}"
                                   DestinationFiles="$(OutDir)runtimes/linux-x64/native/libraylib.so"
                                   SkipUnchangedFiles="false"
                                   Condition="Exists('$(OutDir)runtimes/linux-x64/native/libraylib.so')" />
-                            <Copy SourceFiles="{PathM.LibPath("libraylib.dll")}"
+                            <Copy SourceFiles="{PathM.GetLibPath("libraylib.dll")}"
                                   DestinationFiles="$(OutDir)runtimes/win-x64/native/raylib.dll"
                                   SkipUnchangedFiles="false"
                                   Condition="Exists('$(OutDir)runtimes/win-x64/native/raylib.dll')" />
@@ -84,10 +84,10 @@ public static class ScriptingManager {
                         <Target Name="FixRaylibBundleConflict" BeforeTargets="GenerateSingleFileBundle">
                             <ItemGroup>
                                 <FilesToBundle Remove="@(FilesToBundle)" Condition="'%(FileName)' == 'raylib' or '%(FileName)' == 'libraylib'" />
-                                <FilesToBundle Include="{PathM.LibPath("libraylib.so")}" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+                                <FilesToBundle Include="{PathM.GetLibPath("libraylib.so")}" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
                                     <RelativePath>libraylib.so</RelativePath>
                                 </FilesToBundle>
-                                <FilesToBundle Include="{PathM.LibPath("libraylib.dll")}" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+                                <FilesToBundle Include="{PathM.GetLibPath("libraylib.dll")}" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
                                     <RelativePath>raylib.dll</RelativePath>
                                 </FilesToBundle>
                             </ItemGroup>
@@ -115,7 +115,7 @@ public static class ScriptingManager {
                           #endif
                       
                           public static async Task Main(string[] args)
-                              => await Player.Ignite(new {{project.Pascal}}.{{project.Pascal}}(), DebugMode);
+                              => await MainLoop.Ignite(new {{project.Pascal}}.{{project.Pascal}}(), DebugMode);
                       }
                       """;
 

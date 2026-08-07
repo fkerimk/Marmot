@@ -10,8 +10,5 @@ __pycache__/
 # Project files
 /projects/
 
-# Script maintained
-/lib/raylib/
-
 # Dotnet
 *.DotSettings.user
